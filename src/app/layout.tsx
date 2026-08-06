@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   description: "شركة محلية ودولية متخصصة في استيراد وتصدير المواد الخام وتوريد البلاستيك للمصانع. | Local and international trade company specializing in importing and exporting raw materials.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ar" dir="rtl" className={`${inter.variable} antialiased scroll-smooth`}>
       <body className="min-h-screen flex flex-col font-sans bg-primary text-slate-100">{children}</body>
