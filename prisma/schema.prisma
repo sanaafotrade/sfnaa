@@ -1,0 +1,45 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_PRISMA_URL") // uses connection pooling
+  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
+}
+
+model EmailRecord {
+  id          String   @id @default(cuid())
+  to          String
+  from        String
+  subject     String?
+  text        String?
+  html        String?
+  attachments Json?    // Stores array of attachment objects
+  
+  // Status flags
+  status      String   @default("inbox") // "inbox", "spam", "deleted"
+  isRead      Boolean  @default(false)
+  isStarred   Boolean  @default(false)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model EmailSettings {
+  id                 String   @id @default("default")
+  
+  signature          String   @default("")
+  senderName         String   @default("Safana Najd")
+  signatureEnabled   Boolean  @default(false)
+  
+  autoReplyEnabled   Boolean  @default(false)
+  autoReplySubject   String   @default("شكراً لتواصلك - مؤسسة سفانة نجد")
+  autoReplyBody      String   @default("تم استلام رسالتك بنجاح. سنقوم بالرد عليك في أقرب وقت.")
+  autoReplyTeamName  String   @default("فريق سفانة نجد")
+  
+  trustedEmails      String[] @default([])
+  blockedEmails      String[] @default([])
+  
+  updatedAt          DateTime @updatedAt
+}
