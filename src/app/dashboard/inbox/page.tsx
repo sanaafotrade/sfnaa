@@ -1,129 +1,603 @@
-import prisma from "@/lib/prisma";
-import { Search, Star, Trash2, Mail, MailOpen, RefreshCw, Send, ArchiveX } from "lucide-react";
-import Link from "next/link";
-import { formatDistanceToNow } from "date-fns";
-import { arSA } from "date-fns/locale";
+"use client";
 
-export const dynamic = "force-dynamic";
+import { useState, useEffect, useRef } from "react";
+import { toast } from "sonner";
+import { useLanguage } from "@/lib/i18n";
+import {
+  Mail, Send, Inbox, Loader2, ArrowRight, Clock,
+  Plus, X, Paperclip, Image as ImageIcon, FileText, File,
+  Trash2, Reply, Forward, MailOpen,
+  RefreshCw, Search, Star, ShieldBan, Trash, MailCheck, MailX,
+  CheckCircle, AlertTriangle,
+  Square, SquareCheck, Minus,
+  Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight,
+  Heading1, Heading2, Wand2
+} from "lucide-react";
 
-export default async function InboxPage({ searchParams }: { searchParams: { tab?: string } }) {
-  const tab = searchParams.tab || 'inbox';
-  
-  let whereClause = {};
-  if (tab === 'inbox') whereClause = { status: "inbox" };
-  else if (tab === 'sent') whereClause = { status: "sent" };
-  else if (tab === 'starred') whereClause = { isStarred: true };
-  else if (tab === 'trash') whereClause = { status: "trash" };
+// ============ Types ============
+interface EmailRecord {
+  id: string;
+  to: string;
+  from: string;
+  subject: string | null;
+  text: string | null;
+  html: string | null;
+  attachments: any;
+  status: string;
+  isRead: boolean;
+  isStarred: boolean;
+  createdAt: string;
+}
 
-  const emails = await prisma.emailRecord.findMany({
-    where: whereClause,
-    orderBy: { createdAt: "desc" },
+type FolderType = "inbox" | "sent" | "starred" | "spam" | "trash";
+
+// ============ Helpers ============
+function getInitials(email: string): string {
+  return (email.split("@")[0] || "?").charAt(0).toUpperCase();
+}
+
+function getAvatarColor(email: string): string {
+  const colors = [
+    "bg-blue-500", "bg-emerald-500", "bg-violet-500", "bg-amber-500",
+    "bg-rose-500", "bg-cyan-500", "bg-indigo-500", "bg-pink-500",
+    "bg-teal-500", "bg-orange-500",
+  ];
+  let h = 0;
+  for (let i = 0; i < email.length; i++) h = email.charCodeAt(i) + ((h << 5) - h);
+  return colors[Math.abs(h) % colors.length];
+}
+
+function formatShortDate(dateStr: string): string {
+  const d = new Date(dateStr);
+  const now = new Date();
+  if (d.toDateString() === now.toDateString()) {
+    return d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+  }
+  return d.toLocaleDateString("en-US", { day: "2-digit", month: "short" });
+}
+
+function getPreviewText(email: EmailRecord): string {
+  return (email.text || "").replace(/\s+/g, " ").trim().substring(0, 100) || "لا يوجد محتوى";
+}
+
+// ============ Folder Config ============
+const FOLDERS: { key: FolderType; label: string; labelEn: string; icon: any }[] = [
+  { key: "inbox", label: "الوارد", labelEn: "Inbox", icon: Inbox },
+  { key: "sent", label: "الصادر", labelEn: "Sent", icon: Send },
+  { key: "starred", label: "المميزة", labelEn: "Starred", icon: Star },
+  { key: "spam", label: "البريد المزعج", labelEn: "Spam", icon: ShieldBan },
+  { key: "trash", label: "المحذوفة", labelEn: "Trash", icon: Trash },
+];
+
+// ============ Main Component ============
+export default function EmailPage() {
+  const { t } = useLanguage();
+  const [activeFolder, setActiveFolder] = useState<FolderType>("inbox");
+  const [emails, setEmails] = useState<EmailRecord[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedEmail, setSelectedEmail] = useState<EmailRecord | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  // Compose state
+  const [showCompose, setShowCompose] = useState(false);
+  const [composeTo, setComposeTo] = useState("");
+  const [composeSubject, setComposeSubject] = useState("");
+  const [composeBody, setComposeBody] = useState("");
+  const [composeAttachments, setComposeAttachments] = useState<File[]>([]);
+  const [isSending, setIsSending] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const editorRef = useRef<HTMLDivElement>(null);
+
+  // ============ Data Loading ============
+  const loadEmails = async () => {
+    setIsLoading(true);
+    try {
+      const res = await fetch(`/api/emails?tab=${activeFolder}`);
+      const data = await res.json();
+      setEmails(Array.isArray(data) ? data : []);
+    } catch {
+      toast.error("حدث خطأ أثناء تحميل الرسائل");
+      setEmails([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    setSelectedEmail(null);
+    setSelectedIds(new Set());
+    loadEmails();
+  }, [activeFolder]);
+
+  // ============ Email Actions ============
+  const handleOpenEmail = (email: EmailRecord) => {
+    setSelectedEmail(email);
+  };
+
+  const handleToggleStar = async (e: React.MouseEvent, email: EmailRecord) => {
+    e.stopPropagation();
+    // TODO: Implement star toggle API
+    setEmails(prev => prev.map(em => em.id === email.id ? { ...em, isStarred: !em.isStarred } : em));
+  };
+
+  // ============ Selection ============
+  const filteredEmails = emails.filter(e => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      e.subject?.toLowerCase().includes(q) ||
+      e.from?.toLowerCase().includes(q) ||
+      e.to?.toLowerCase().includes(q) ||
+      e.text?.toLowerCase().includes(q)
+    );
   });
 
-  const tabs = [
-    { id: 'inbox', label: 'الوارد', icon: Mail },
-    { id: 'sent', label: 'الصادر', icon: Send },
-    { id: 'starred', label: 'المميزة', icon: Star },
-    { id: 'trash', label: 'المحذوفة', icon: Trash2 },
-  ];
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => {
+      const n = new Set(prev);
+      n.has(id) ? n.delete(id) : n.add(id);
+      return n;
+    });
+  };
 
+  const toggleSelectAll = () => {
+    if (selectedIds.size === filteredEmails.length) setSelectedIds(new Set());
+    else setSelectedIds(new Set(filteredEmails.map(e => e.id)));
+  };
+
+  // ============ Compose ============
+  const resetCompose = () => {
+    setComposeTo("");
+    setComposeSubject("");
+    setComposeBody("");
+    setComposeAttachments([]);
+    if (editorRef.current) {
+      editorRef.current.innerHTML = "";
+    }
+  };
+
+  const handleSendEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!composeTo || !composeSubject || !composeBody) {
+      toast.error("جميع الحقول مطلوبة");
+      return;
+    }
+    setIsSending(true);
+    try {
+      const uploadedFiles = [];
+      for (const file of composeAttachments) {
+        const formData = new FormData();
+        formData.append("file", file);
+        const res = await fetch("/api/upload", { method: "POST", body: formData });
+        const { url } = await res.json();
+        uploadedFiles.push({ filename: file.name, url });
+      }
+
+      const response = await fetch("/api/emails/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: composeTo,
+          subject: composeSubject,
+          text: composeBody,
+          attachments: uploadedFiles,
+        }),
+      });
+
+      if (response.ok) {
+        toast.success("تم إرسال الرسالة بنجاح! ✉️");
+        setTimeout(() => {
+          setShowCompose(false);
+          resetCompose();
+          setActiveFolder("sent");
+          loadEmails();
+        }, 1500);
+      } else {
+        toast.error("فشل إرسال الرسالة. يرجى المحاولة مرة أخرى.");
+      }
+    } catch {
+      toast.error("حدث خطأ أثناء الإرسال.");
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const handleAddFiles = (files: FileList | null) => {
+    if (!files) return;
+    const newFiles = Array.from(files);
+    setComposeAttachments(prev => [...prev, ...newFiles]);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const removeAttachment = (i: number) => {
+    setComposeAttachments(prev => prev.filter((_, j) => j !== i));
+  };
+
+  const handleReply = (email: EmailRecord) => {
+    resetCompose();
+    setComposeTo(email.status === "inbox" ? email.from : email.to);
+    setComposeSubject(email.subject?.startsWith("Re:") ? email.subject : `Re: ${email.subject}`);
+    setShowCompose(true);
+  };
+
+  const handleForward = (email: EmailRecord) => {
+    resetCompose();
+    setComposeSubject(email.subject?.startsWith("Fwd:") ? email.subject : `Fwd: ${email.subject}`);
+    setComposeBody(email.text || "");
+    setShowCompose(true);
+  };
+
+  const getFileIcon = (name: string) => {
+    if (/\.(jpg|jpeg|png|gif|webp)$/i.test(name)) return <ImageIcon className="w-4 h-4 text-emerald-600" />;
+    if (/\.pdf$/i.test(name)) return <FileText className="w-4 h-4 text-red-600" />;
+    return <File className="w-4 h-4 text-blue-600" />;
+  };
+
+  // ============ RENDER ============
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-neutral-950">
-      {/* Header Area */}
-      <header className="border-b border-neutral-200 dark:border-neutral-800 p-4">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex gap-2 border-b border-transparent">
-            {tabs.map((t) => {
-              const Icon = t.icon;
-              const isActive = tab === t.id;
-              return (
-                <Link
-                  key={t.id}
-                  href={`/dashboard/inbox?tab=${t.id}`}
-                  className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-colors ${
-                    isActive 
-                      ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400' 
-                      : 'text-neutral-600 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800'
+    <div className="flex flex-col h-full">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-6 border-b border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950">
+        <div>
+          <h1 className="text-2xl font-bold text-neutral-900 dark:text-white flex items-center gap-2">
+            <Mail className="w-7 h-7 text-blue-600" />
+            {t({ ar: "البريد الإلكتروني", en: "Email" })}
+          </h1>
+          <p className="text-neutral-500 dark:text-neutral-400 mt-1 text-sm">
+            {t({ ar: "صادر ووارد رسائل النظام والعقود", en: "Incoming and outgoing system messages" })}
+          </p>
+        </div>
+        <button
+          onClick={() => { setShowCompose(true); resetCompose(); }}
+          className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-5 rounded-xl transition-all flex items-center gap-2 shadow-sm hover:shadow-md"
+        >
+          <Plus className="w-5 h-5" />
+          {t({ ar: "إنشاء رسالة جديدة", en: "Compose New" })}
+        </button>
+      </div>
+
+      {/* Main Container */}
+      <div className="flex-1 flex flex-col overflow-hidden bg-white dark:bg-neutral-950">
+        {/* Folder Tabs + Toolbar */}
+        <div className="border-b border-neutral-100 dark:border-neutral-800 bg-neutral-50/80 dark:bg-neutral-900/50">
+          <div className="flex items-center justify-between px-4 py-2">
+            <div className="flex gap-1 overflow-x-auto">
+              {FOLDERS.map(f => (
+                <button
+                  key={f.key}
+                  onClick={() => setActiveFolder(f.key)}
+                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap ${
+                    activeFolder === f.key
+                      ? "bg-blue-600 text-white shadow-sm"
+                      : "text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800"
                   }`}
                 >
-                  <Icon className="w-4 h-4" />
-                  {t.label}
-                </Link>
-              );
-            })}
+                  <f.icon className="w-4 h-4" />
+                  <span className="hidden sm:inline">{t({ ar: f.label, en: f.labelEn })}</span>
+                </button>
+              ))}
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="relative hidden sm:block">
+                <Search className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  placeholder={t({ ar: "بحث...", en: "Search..." })}
+                  className="border border-neutral-200 dark:border-neutral-700 rounded-lg pr-9 pl-3 py-2 text-sm w-44 focus:ring-2 focus:ring-blue-500 outline-none bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white"
+                />
+              </div>
+              <button
+                onClick={loadEmails}
+                title={t({ ar: "تحديث", en: "Refresh" })}
+                className="p-2 text-neutral-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+              >
+                <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
+              </button>
+            </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="relative w-64 md:w-80">
-              <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
-              <input 
-                type="text" 
-                placeholder="البحث في الرسائل..." 
-                className="w-full bg-neutral-100 dark:bg-neutral-900 border-none rounded-full py-2 pr-10 pl-4 text-sm focus:ring-2 focus:ring-blue-500 transition-all outline-none"
-              />
+          {/* Bulk Actions Bar */}
+          {!selectedEmail && !showCompose && filteredEmails.length > 0 && (
+            <div className="flex items-center gap-2 px-4 py-2 border-t border-neutral-100 dark:border-neutral-800">
+              <button
+                onClick={toggleSelectAll}
+                className="p-1 text-neutral-400 hover:text-blue-600 transition-colors"
+              >
+                {selectedIds.size === 0 ? (
+                  <Square className="w-5 h-5" />
+                ) : selectedIds.size === filteredEmails.length ? (
+                  <SquareCheck className="w-5 h-5 text-blue-600" />
+                ) : (
+                  <Minus className="w-5 h-5 text-blue-600" />
+                )}
+              </button>
+              {selectedIds.size > 0 && (
+                <div className="flex items-center gap-1">
+                  <span className="text-xs text-neutral-500 ml-2">{selectedIds.size} {t({ ar: "محدد", en: "selected" })}</span>
+                  <div className="h-4 w-px bg-neutral-200 dark:bg-neutral-700 mx-1" />
+                  <button onClick={() => {}} title={t({ ar: "تعليم مقروء", en: "Mark Read" })} className="p-1.5 text-neutral-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors">
+                    <MailOpen className="w-4 h-4" />
+                  </button>
+                  <button onClick={() => {}} title={t({ ar: "حذف", en: "Delete" })} className="p-1.5 text-neutral-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
             </div>
-            <button className="p-2 text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-full transition-colors" title="تحديث">
-              <RefreshCw className="w-5 h-5" />
-            </button>
-          </div>
+          )}
         </div>
-      </header>
 
-      {/* Email List */}
-      <div className="flex-1 overflow-y-auto">
-        {emails.length === 0 ? (
-          <div className="p-16 flex flex-col items-center justify-center text-center h-full">
-            <div className="w-16 h-16 bg-neutral-100 dark:bg-neutral-900 rounded-full flex items-center justify-center mb-4">
-              <ArchiveX className="w-8 h-8 text-neutral-400" />
+        {/* ===== Content ===== */}
+        {showCompose ? (
+          /* ========== COMPOSE VIEW ========== */
+          <div className="flex flex-col flex-1 overflow-y-auto">
+            <div className="px-6 py-4 border-b border-neutral-100 dark:border-neutral-800 flex items-center gap-3 bg-neutral-50/80 dark:bg-neutral-900/50">
+              <button
+                onClick={() => { setShowCompose(false); resetCompose(); }}
+                className="p-2 text-neutral-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+              >
+                <ArrowRight className="w-5 h-5" />
+              </button>
+              <h2 className="text-lg font-bold text-neutral-900 dark:text-white flex items-center gap-2">
+                <Send className="w-5 h-5 text-blue-600" />
+                {t({ ar: "إنشاء رسالة جديدة", en: "Compose New Message" })}
+              </h2>
             </div>
-            <h3 className="text-lg font-semibold text-neutral-800 dark:text-neutral-200">لا توجد رسائل</h3>
-            <p className="text-neutral-500 mt-1 max-w-sm">لا يوجد شيء لعرضه في هذا المجلد حالياً.</p>
+            <form onSubmit={handleSendEmail} className="p-6 md:p-10 space-y-6 flex-1 max-w-4xl mx-auto w-full">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-bold text-neutral-700 dark:text-neutral-300 mb-2">{t({ ar: "إلى", en: "To" })}</label>
+                  <input
+                    type="email"
+                    value={composeTo}
+                    onChange={e => setComposeTo(e.target.value)}
+                    placeholder="email@example.com"
+                    className="w-full border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none"
+                    dir="ltr"
+                    required
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-neutral-700 dark:text-neutral-300 mb-2">{t({ ar: "الموضوع", en: "Subject" })}</label>
+                <input
+                  type="text"
+                  value={composeSubject}
+                  onChange={e => setComposeSubject(e.target.value)}
+                  placeholder={t({ ar: "عنوان الرسالة...", en: "Message subject..." })}
+                  className="w-full border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none"
+                  required
+                />
+              </div>
+              {/* Editor / Body */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-bold text-neutral-700 dark:text-neutral-300">
+                    {t({ ar: "محتوى الرسالة", en: "Message Body" })}
+                  </label>
+                  <button type="button" className="text-xs font-medium text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 flex items-center gap-1 bg-violet-50 dark:bg-violet-900/20 hover:bg-violet-100 dark:hover:bg-violet-900/40 px-3 py-1.5 rounded-lg transition-colors">
+                    <Wand2 className="w-3.5 h-3.5" /> 
+                    {t({ ar: "مساعد الذكاء الاصطناعي", en: "AI Assistant" })}
+                  </button>
+                </div>
+                
+                {/* Rich Text Toolbar */}
+                <div className="flex flex-wrap items-center gap-1 p-2 bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 border-b-0 rounded-t-xl text-neutral-600 dark:text-neutral-300">
+                  <button type="button" onClick={() => document.execCommand("bold")} className="p-1.5 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded transition-colors" title="عريض"><Bold className="w-4 h-4" /></button>
+                  <button type="button" onClick={() => document.execCommand("italic")} className="p-1.5 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded transition-colors" title="مائل"><Italic className="w-4 h-4" /></button>
+                  <button type="button" onClick={() => document.execCommand("underline")} className="p-1.5 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded transition-colors" title="تحته خط"><Underline className="w-4 h-4" /></button>
+                  <div className="h-4 w-px bg-neutral-300 dark:bg-neutral-700 mx-1" />
+                  <button type="button" onClick={() => document.execCommand("justifyLeft")} className="p-1.5 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded transition-colors" title="محاذاة يسار"><AlignLeft className="w-4 h-4" /></button>
+                  <button type="button" onClick={() => document.execCommand("justifyCenter")} className="p-1.5 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded transition-colors" title="محاذاة وسط"><AlignCenter className="w-4 h-4" /></button>
+                  <button type="button" onClick={() => document.execCommand("justifyRight")} className="p-1.5 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded transition-colors" title="محاذاة يمين"><AlignRight className="w-4 h-4" /></button>
+                  <div className="h-4 w-px bg-neutral-300 dark:bg-neutral-700 mx-1" />
+                  <button type="button" onClick={() => document.execCommand("formatBlock", false, "H1")} className="p-1.5 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded transition-colors" title="عنوان كبير"><Heading1 className="w-4 h-4" /></button>
+                  <button type="button" onClick={() => document.execCommand("formatBlock", false, "H2")} className="p-1.5 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded transition-colors" title="عنوان متوسط"><Heading2 className="w-4 h-4" /></button>
+                </div>
+                
+                <div 
+                  ref={editorRef}
+                  contentEditable
+                  onInput={(e) => setComposeBody(e.currentTarget.innerHTML)}
+                  className="w-full min-h-[300px] border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white rounded-b-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none overflow-y-auto prose dark:prose-invert max-w-none"
+                  dir="auto"
+                />
+              </div>
+
+              {/* Attachments */}
+              {composeAttachments.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {composeAttachments.map((file, i) => (
+                    <div key={i} className="flex items-center gap-2 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-full px-4 py-1.5 text-sm">
+                      {getFileIcon(file.name)}
+                      <span className="truncate max-w-[200px] text-neutral-700 dark:text-neutral-200 font-medium">{file.name}</span>
+                      <span className="text-xs text-neutral-400">{(file.size / 1024 / 1024).toFixed(2)} MB</span>
+                      <button type="button" onClick={() => removeAttachment(i)} className="text-neutral-400 hover:text-red-500 p-1 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20">
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="flex items-center justify-between pt-4 border-t border-neutral-100 dark:border-neutral-800">
+                <label className="cursor-pointer flex items-center gap-2 px-4 py-2.5 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-xl transition-colors font-medium">
+                  <Paperclip className="w-5 h-5" />
+                  <span>{t({ ar: "إرفاق ملف", en: "Attach File" })}</span>
+                  <input type="file" multiple className="hidden" ref={fileInputRef} onChange={e => handleAddFiles(e.target.files)} />
+                </label>
+                <button
+                  type="submit"
+                  disabled={isSending}
+                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-70 text-white px-8 py-2.5 rounded-xl font-bold transition-all shadow-lg shadow-blue-600/20"
+                >
+                  <Send className="w-5 h-5" />
+                  {isSending ? t({ ar: "جاري الإرسال...", en: "Sending..." }) : t({ ar: "إرسال الرسالة", en: "Send Message" })}
+                </button>
+              </div>
+            </form>
+          </div>
+        ) : selectedEmail ? (
+          /* ========== EMAIL VIEW ========== */
+          <div className="flex flex-col flex-1 overflow-y-auto">
+            <div className="px-6 py-4 border-b border-neutral-100 dark:border-neutral-800 flex items-center justify-between bg-neutral-50/80 dark:bg-neutral-900/50">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setSelectedEmail(null)}
+                  className="p-2 text-neutral-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                >
+                  <ArrowRight className="w-5 h-5" />
+                </button>
+                <h2 className="text-lg font-bold text-neutral-900 dark:text-white truncate max-w-lg">
+                  {selectedEmail.subject || "(بدون عنوان)"}
+                </h2>
+              </div>
+              <div className="flex items-center gap-2">
+                <button onClick={() => handleReply(selectedEmail)} className="p-2 text-neutral-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors" title={t({ ar: "رد", en: "Reply" })}>
+                  <Reply className="w-5 h-5" />
+                </button>
+                <button onClick={() => handleForward(selectedEmail)} className="p-2 text-neutral-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors" title={t({ ar: "تحويل", en: "Forward" })}>
+                  <Forward className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+            <div className="p-6 md:p-10 flex-1 max-w-4xl mx-auto w-full">
+              <div className="flex items-start gap-4 mb-8">
+                <div className={`w-12 h-12 rounded-full ${getAvatarColor(selectedEmail.from)} flex items-center justify-center text-white font-bold text-lg shrink-0`}>
+                  {getInitials(selectedEmail.from)}
+                </div>
+                <div className="min-w-0">
+                  <p className="font-bold text-neutral-900 dark:text-white">{selectedEmail.from}</p>
+                  <p className="text-sm text-neutral-500 dark:text-neutral-400">{t({ ar: "إلى", en: "To" })}: {selectedEmail.to}</p>
+                  <p className="text-xs text-neutral-400 mt-1 flex items-center gap-1">
+                    <Clock className="w-3 h-3" />
+                    {new Date(selectedEmail.createdAt).toLocaleString("ar-SA")}
+                  </p>
+                </div>
+              </div>
+              <div className="prose dark:prose-invert max-w-none text-neutral-800 dark:text-neutral-200 leading-relaxed whitespace-pre-wrap">
+                {selectedEmail.html ? (
+                  <div dangerouslySetInnerHTML={{ __html: selectedEmail.html }} />
+                ) : (
+                  <p>{selectedEmail.text}</p>
+                )}
+              </div>
+
+              {/* Attachments */}
+              {selectedEmail.attachments && Array.isArray(selectedEmail.attachments) && selectedEmail.attachments.length > 0 && (
+                <div className="mt-8 pt-6 border-t border-neutral-100 dark:border-neutral-800">
+                  <h3 className="text-sm font-bold text-neutral-700 dark:text-neutral-300 mb-3 flex items-center gap-2">
+                    <Paperclip className="w-4 h-4" />
+                    {t({ ar: "المرفقات", en: "Attachments" })} ({selectedEmail.attachments.length})
+                  </h3>
+                  <div className="flex flex-wrap gap-3">
+                    {selectedEmail.attachments.map((att: any, i: number) => (
+                      <a
+                        key={i}
+                        href={att.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 p-3 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+                      >
+                        {getFileIcon(att.filename)}
+                        <span className="text-sm font-medium text-neutral-700 dark:text-neutral-200">{att.filename}</span>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         ) : (
-          <div className="divide-y divide-neutral-100 dark:divide-neutral-800">
-            {emails.map((email) => {
-              const firstLetter = email.from ? email.from.charAt(0).toUpperCase() : '?';
-              return (
-                <Link 
-                  key={email.id} 
-                  href={`/dashboard/email/${email.id}`}
-                  className={`flex items-center gap-4 p-4 hover:shadow-md hover:z-10 relative transition-all bg-white dark:bg-neutral-950 border-l-4 ${!email.isRead ? 'border-blue-500 bg-blue-50/30' : 'border-transparent'}`}
-                >
-                  <div className="flex items-center gap-3 opacity-0 hover:opacity-100 transition-opacity absolute right-4 bg-white/90 dark:bg-neutral-950/90 py-2 px-3 rounded-lg shadow-sm">
-                    <button className="text-neutral-400 hover:text-yellow-500 transition-colors">
-                      <Star className={`w-5 h-5 ${email.isStarred ? 'fill-yellow-500 text-yellow-500' : ''}`} />
-                    </button>
-                    <button className="text-neutral-400 hover:text-red-500 transition-colors">
-                      <Trash2 className="w-5 h-5" />
-                    </button>
-                  </div>
+          /* ========== EMAIL LIST ========== */
+          <div className="flex-1 overflow-y-auto">
+            {isLoading ? (
+              <div className="flex items-center justify-center h-64">
+                <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+              </div>
+            ) : filteredEmails.length === 0 ? (
+              <div className="p-16 flex flex-col items-center justify-center text-center h-full">
+                <div className="w-16 h-16 bg-neutral-100 dark:bg-neutral-900 rounded-full flex items-center justify-center mb-4">
+                  <Mail className="w-8 h-8 text-neutral-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-neutral-800 dark:text-neutral-200">
+                  {t({ ar: "لا توجد رسائل", en: "No messages" })}
+                </h3>
+                <p className="text-neutral-500 mt-1 max-w-sm">
+                  {t({ ar: "لا يوجد شيء لعرضه في هذا المجلد حالياً.", en: "Nothing to show in this folder." })}
+                </p>
+              </div>
+            ) : (
+              <div className="divide-y divide-neutral-100 dark:divide-neutral-800">
+                {filteredEmails.map(email => {
+                  const senderEmail = email.status === "sent" ? email.to : email.from;
+                  return (
+                    <div
+                      key={email.id}
+                      onClick={() => handleOpenEmail(email)}
+                      className={`flex items-center gap-4 px-4 py-3 cursor-pointer transition-all hover:bg-blue-50/50 dark:hover:bg-blue-900/10 ${
+                        !email.isRead && email.status === "inbox"
+                          ? "bg-white dark:bg-neutral-950 font-semibold"
+                          : "bg-neutral-50/30 dark:bg-neutral-950/50"
+                      }`}
+                    >
+                      {/* Checkbox */}
+                      <button
+                        onClick={e => { e.stopPropagation(); toggleSelect(email.id); }}
+                        className="text-neutral-400 hover:text-blue-600 transition-colors shrink-0"
+                      >
+                        {selectedIds.has(email.id) ? (
+                          <SquareCheck className="w-5 h-5 text-blue-600" />
+                        ) : (
+                          <Square className="w-5 h-5" />
+                        )}
+                      </button>
 
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold flex-shrink-0 shadow-sm">
-                    {firstLetter}
-                  </div>
+                      {/* Star */}
+                      <button
+                        onClick={e => handleToggleStar(e, email)}
+                        className="shrink-0 transition-colors"
+                      >
+                        <Star className={`w-5 h-5 ${email.isStarred ? "fill-amber-400 text-amber-400" : "text-neutral-300 dark:text-neutral-600 hover:text-amber-400"}`} />
+                      </button>
 
-                  <div className="flex-1 min-w-0 flex items-center justify-between gap-4">
-                    <div className="flex-1 min-w-0 grid grid-cols-12 gap-4 items-center">
-                      <div className="col-span-3">
-                        <p className={`text-sm truncate ${!email.isRead ? 'font-bold text-neutral-900 dark:text-white' : 'font-medium text-neutral-700 dark:text-neutral-300'}`}>
-                          {email.from}
-                        </p>
+                      {/* Avatar */}
+                      <div className={`w-10 h-10 rounded-full ${getAvatarColor(senderEmail)} flex items-center justify-center text-white font-bold shrink-0 text-sm`}>
+                        {getInitials(senderEmail)}
                       </div>
-                      <div className="col-span-7">
-                        <p className={`text-sm truncate ${!email.isRead ? 'font-semibold text-neutral-800 dark:text-neutral-200' : 'text-neutral-600 dark:text-neutral-400'}`}>
-                          {email.subject || '(بدون عنوان)'}
-                        </p>
-                      </div>
-                      <div className="col-span-2 text-left">
-                        <span className={`text-xs whitespace-nowrap ${!email.isRead ? 'font-bold text-blue-600 dark:text-blue-400' : 'text-neutral-500'}`}>
-                          {formatDistanceToNow(new Date(email.createdAt), { addSuffix: true, locale: arSA })}
-                        </span>
+
+                      {/* Content */}
+                      <div className="flex-1 min-w-0 grid grid-cols-12 gap-2 items-center">
+                        <div className="col-span-3">
+                          <p className={`text-sm truncate ${!email.isRead && email.status === "inbox" ? "font-bold text-neutral-900 dark:text-white" : "text-neutral-700 dark:text-neutral-300"}`}>
+                            {senderEmail}
+                          </p>
+                        </div>
+                        <div className="col-span-7">
+                          <p className={`text-sm truncate ${!email.isRead && email.status === "inbox" ? "font-semibold text-neutral-800 dark:text-neutral-200" : "text-neutral-600 dark:text-neutral-400"}`}>
+                            {email.subject || "(بدون عنوان)"}
+                          </p>
+                          <p className="text-xs text-neutral-400 truncate mt-0.5">
+                            {getPreviewText(email)}
+                          </p>
+                        </div>
+                        <div className="col-span-2 text-left">
+                          <span className={`text-xs whitespace-nowrap ${!email.isRead && email.status === "inbox" ? "font-bold text-blue-600 dark:text-blue-400" : "text-neutral-500"}`}>
+                            {formatShortDate(email.createdAt)}
+                          </span>
+                          {email.attachments && Array.isArray(email.attachments) && email.attachments.length > 0 && (
+                            <Paperclip className="w-3 h-3 text-neutral-400 inline-block ml-1" />
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </Link>
-              );
-            })}
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
       </div>
