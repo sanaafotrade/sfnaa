@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import Providers from "./providers";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -15,7 +16,11 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ar" dir="rtl" className={`${inter.variable} antialiased scroll-smooth`}>
-      <body className="min-h-screen flex flex-col font-sans bg-primary text-slate-100">{children}</body>
+      <body className="min-h-screen flex flex-col font-sans">
+        <Providers>
+          {children}
+        </Providers>
+      </body>
     </html>
   );
 }

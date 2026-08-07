@@ -1,0 +1,27 @@
+import { NextResponse } from 'next/server';
+import prisma from '@/lib/prisma';
+
+export const dynamic = 'force-dynamic';
+
+export async function GET() {
+  try {
+    const partners = await prisma.partner.findMany({
+      orderBy: { order: 'asc' },
+    });
+    return NextResponse.json(partners);
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to fetch partners' }, { status: 500 });
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    const data = await request.json();
+    const partner = await prisma.partner.create({
+      data,
+    });
+    return NextResponse.json(partner);
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to create partner' }, { status: 500 });
+  }
+}

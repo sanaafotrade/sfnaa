@@ -43,3 +43,46 @@ model EmailSettings {
   
   updatedAt          DateTime @updatedAt
 }
+
+model Service {
+  id          String   @id @default(cuid())
+  titleAr     String
+  titleEn     String
+  descAr      String
+  descEn      String
+  icon        String   @default("Globe")
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Partner {
+  id          String   @id @default(cuid())
+  name        String
+  logoUrl     String?
+  websiteUrl  String?
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SiteSettings {
+  id              String   @id @default("default")
+  heroTitleAr     String   @default("نربط العالم بصناعتك")
+  heroTitleEn     String   @default("Connecting the World to Your Industry")
+  heroDescAr      String   @default("سفانة نجد للتجارة، شريكك الموثوق في استيراد وتصدير المواد الخام وتوريد البلاستيك بأعلى معايير الجودة العالمية.")
+  heroDescEn      String   @default("Safana Najd Trading, your trusted partner in importing and exporting raw materials and supplying plastics with the highest global quality standards.")
+  aboutTitleAr    String   @default("من نحن")
+  aboutTitleEn    String   @default("About Us")
+  aboutDescAr     String   @default("نحن في سفانة نجد للتجارة نعتز بخبرتنا العميقة في مجال التجارة الدولية. تخصصنا الأساسي هو توفير أفضل المواد الخام اللازمة للصناعات المختلفة، مع التركيز بشكل خاص على قطاع البلاستيك.")
+  aboutDescEn     String   @default("At Safana Najd Trading, we pride ourselves on our deep expertise in international trade. Our core specialty is providing the best raw materials for various industries, with a special focus on the plastics sector.")
+  contactEmail    String   @default("info@sfnaa.com")
+  contactPhone    String   @default("+966 50 000 0000")
+  contactAddress  String   @default("الرياض، المملكة العربية السعودية")
+  statsClients    String   @default("+50")
+  statsYears      String   @default("+15")
+  statsCountries  String   @default("+10")
+  updatedAt       DateTime @updatedAt
+}
