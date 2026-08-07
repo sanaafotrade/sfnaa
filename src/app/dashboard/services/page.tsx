@@ -142,6 +142,10 @@ export default function ServicesPage() {
                   <label className="block text-sm mb-1">الترتيب</label>
                   <input type="number" value={currentService.order || 0} onChange={e => setCurrentService({...currentService, order: e.target.value})} className="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 outline-none px-4 py-2 text-neutral-900 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-400" />
                 </div>
+                <div>
+                  <label className="block text-sm mb-1">الأيقونة أو رابط الصورة</label>
+                  <input type="text" value={currentService.icon || ''} onChange={e => setCurrentService({...currentService, icon: e.target.value})} className="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 outline-none px-4 py-2 text-neutral-900 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-400" dir="ltr" placeholder="Globe" />
+                </div>
                 <div className="flex items-center mt-6">
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input type="checkbox" checked={currentService.isActive !== false} onChange={e => setCurrentService({...currentService, isActive: e.target.checked})} className="w-4 h-4" />

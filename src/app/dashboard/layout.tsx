@@ -3,7 +3,7 @@
 import { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Inbox, Send, Settings, ShieldCheck, MailPlus, Globe, Layout, Users, LayoutDashboard, Moon, Sun, Languages } from "lucide-react";
+import { Inbox, Send, Settings, ShieldCheck, MailPlus, Globe, Layout, Users, LayoutDashboard, Moon, Sun, Languages, Plus } from "lucide-react";
 import LogoutButton from "./LogoutButton";
 import { useLanguage } from "@/lib/i18n";
 import { useTheme } from "@/lib/theme";
@@ -41,6 +41,14 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         </div>
         
         <nav className="flex-1 px-4 space-y-1 mt-2 overflow-y-auto">
+          <Link 
+            href="/dashboard/compose" 
+            className="flex items-center justify-center gap-2 px-4 py-3 mb-6 rounded-lg transition-colors bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-sm w-full"
+          >
+            <Plus className="w-5 h-5" />
+            <span>{t({ ar: "رسالة جديدة", en: "Compose" })}</span>
+          </Link>
+
           {/* Overview */}
           <Link href="/dashboard" className={navLinkClass("/dashboard")}>
             <LayoutDashboard className="w-5 h-5" />
@@ -55,10 +63,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           <Link href="/dashboard/inbox" className={navLinkClass("/dashboard/inbox")}>
             <Inbox className="w-5 h-5" />
             {t({ ar: "صندوق الوارد", en: "Inbox" })}
-          </Link>
-          <Link href="/dashboard/compose" className={navLinkClass("/dashboard/compose")}>
-            <MailPlus className="w-5 h-5" />
-            {t({ ar: "رسالة جديدة", en: "Compose" })}
           </Link>
           <Link href="/dashboard/sent" className={navLinkClass("/dashboard/sent")}>
             <Send className="w-5 h-5" />
