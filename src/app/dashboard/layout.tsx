@@ -40,15 +40,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           </h1>
         </div>
         
-        <nav className="flex-1 px-4 space-y-1 mt-2 overflow-y-auto">
-          <Link 
-            href="/dashboard/compose" 
-            className="flex items-center justify-center gap-2 px-4 py-3 mb-6 rounded-lg transition-colors bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-sm w-full"
-          >
-            <Plus className="w-5 h-5" />
-            <span>{t({ ar: "رسالة جديدة", en: "Compose" })}</span>
-          </Link>
-
+        <nav className="flex-1 px-4 space-y-1 mt-6 overflow-y-auto">
           {/* Overview */}
           <Link href="/dashboard" className={navLinkClass("/dashboard")}>
             <LayoutDashboard className="w-5 h-5" />
@@ -57,16 +49,12 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           
           {/* Mail Section */}
           <div className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mt-8 mb-2 px-2">
-            {t({ ar: "البريد", en: "Mail" })}
+            {t({ ar: "النظام", en: "System" })}
           </div>
           
           <Link href="/dashboard/inbox" className={navLinkClass("/dashboard/inbox")}>
             <Inbox className="w-5 h-5" />
-            {t({ ar: "صندوق الوارد", en: "Inbox" })}
-          </Link>
-          <Link href="/dashboard/sent" className={navLinkClass("/dashboard/sent")}>
-            <Send className="w-5 h-5" />
-            {t({ ar: "المرسلة", en: "Sent" })}
+            {t({ ar: "البريد الإلكتروني", en: "Email" })}
           </Link>
           
           {/* Website Section */}
@@ -86,14 +74,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             {t({ ar: "إدارة الشركاء", en: "Partners" })}
           </Link>
           
-          {/* Admin Section */}
-          <div className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mt-8 mb-2 px-2">
-            {t({ ar: "الإدارة", en: "Admin" })}
-          </div>
-          <Link href="/dashboard/settings" className={navLinkClass("/dashboard/settings")}>
-            <Settings className="w-5 h-5" />
-            {t({ ar: "إعدادات البريد", en: "Mail Settings" })}
-          </Link>
+
           
           <div className="mt-4 border-t border-neutral-100 dark:border-neutral-800/50 pt-4">
             <LogoutButton />

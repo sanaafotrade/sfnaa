@@ -9,7 +9,7 @@ import {
   Trash2, Reply, Forward, MailOpen,
   RefreshCw, Search, Star, ShieldBan, Trash, MailCheck, MailX,
   CheckCircle, AlertTriangle,
-  Square, SquareCheck, Minus,
+  Square, SquareCheck, Minus, Settings2,
   Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight,
   Heading1, Heading2, Wand2
 } from "lucide-react";
@@ -78,6 +78,7 @@ export default function EmailPage() {
   const [selectedEmail, setSelectedEmail] = useState<EmailRecord | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [showSettings, setShowSettings] = useState(false);
 
   // Compose state
   const [showCompose, setShowCompose] = useState(false);
@@ -257,8 +258,38 @@ export default function EmailPage() {
         </button>
       </div>
 
+      {/* Settings Modal */}
+      {showSettings && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-neutral-900 rounded-2xl w-full max-w-md max-h-[80vh] flex flex-col overflow-hidden shadow-2xl border border-neutral-200 dark:border-neutral-800">
+            <div className="px-6 py-4 border-b border-neutral-100 dark:border-neutral-800 flex items-center justify-between bg-neutral-50 dark:bg-neutral-900/50">
+              <h2 className="text-lg font-bold text-neutral-900 dark:text-white flex items-center gap-2">
+                <Settings2 className="w-5 h-5 text-blue-600" /> 
+                {t({ ar: "إعدادات البريد", en: "Email Settings" })}
+              </h2>
+              <button onClick={() => setShowSettings(false)} className="text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-300 p-2 rounded-lg transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto space-y-6">
+              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 border border-blue-100 dark:border-blue-900/50">
+                <p className="text-sm font-semibold text-blue-700 dark:text-blue-400 mb-1">قريباً (Coming Soon)</p>
+                <p className="text-xs text-blue-600/80 dark:text-blue-300">
+                  إعدادات التوقيع، الرد التلقائي، والبريد المحظور ستتوفر قريباً حسب نظام الصلاحيات الجديد.
+                </p>
+              </div>
+            </div>
+            <div className="px-6 py-4 border-t border-neutral-100 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/50">
+              <button onClick={() => setShowSettings(false)} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition-all">
+                {t({ ar: "إغلاق", en: "Close" })}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Main Container */}
-      <div className="flex-1 flex flex-col overflow-hidden bg-white dark:bg-neutral-950">
+      <div className="flex-1 flex flex-col overflow-hidden bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-2xl shadow-sm">
         {/* Folder Tabs + Toolbar */}
         <div className="border-b border-neutral-100 dark:border-neutral-800 bg-neutral-50/80 dark:bg-neutral-900/50">
           <div className="flex items-center justify-between px-4 py-2">
@@ -289,6 +320,13 @@ export default function EmailPage() {
                   className="border border-neutral-200 dark:border-neutral-700 rounded-lg pr-9 pl-3 py-2 text-sm w-44 focus:ring-2 focus:ring-blue-500 outline-none bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white"
                 />
               </div>
+              <button
+                onClick={() => setShowSettings(true)}
+                title={t({ ar: "إعدادات البريد", en: "Email Settings" })}
+                className="p-2 text-neutral-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+              >
+                <Settings2 className="w-4 h-4" />
+              </button>
               <button
                 onClick={loadEmails}
                 title={t({ ar: "تحديث", en: "Refresh" })}
