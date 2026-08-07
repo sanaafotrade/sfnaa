@@ -18,14 +18,91 @@ export async function POST(req: Request) {
       path: att.url,
     })) || [];
 
+    const htmlTemplate = `
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f4f4f5;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: 40px auto;
+      background: #ffffff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      border: 1px solid #e4e4e7;
+    }
+    .header {
+      background-color: #09090b;
+      padding: 24px;
+      text-align: center;
+      border-bottom: 3px solid #3b82f6;
+    }
+    .header h1 {
+      color: #ffffff;
+      margin: 0;
+      font-size: 24px;
+      font-weight: 600;
+      letter-spacing: -0.5px;
+    }
+    .content {
+      padding: 32px 24px;
+      color: #3f3f46;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+    .footer {
+      background-color: #fafafa;
+      padding: 24px;
+      text-align: center;
+      font-size: 13px;
+      color: #71717a;
+      border-top: 1px solid #e4e4e7;
+      line-height: 1.5;
+    }
+    .brand {
+      font-weight: 600;
+      color: #09090b;
+    }
+    .content-body {
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>سفانة نجد | Safana Najd</h1>
+    </div>
+    <div class="content">
+      <div class="content-body">${text}</div>
+    </div>
+    <div class="footer">
+      <p>هذه رسالة تلقائية من نظام <span class="brand">سفانة نجد</span> للتجارة والمقاولات.</p>
+      <p>This is an automated message from Safana Najd Trading & Contracting.</p>
+      <p style="margin-top: 12px; font-size: 12px; color: #a1a1aa;">© ${new Date().getFullYear()} Safana Najd. All rights reserved.</p>
+    </div>
+  </div>
+</body>
+</html>
+`;
+
     // Send the email via Resend if API key is configured
     let resendData = null;
     if (process.env.RESEND_API_KEY && process.env.RESEND_API_KEY !== "missing") {
       const { data, error } = await resend.emails.send({
-        from: "سفانة نجد <send@sfnaa.com>", // Using the verified sending domain
+        from: "سفانة نجد <info@sfnaa.com>", // Using info@sfnaa.com
         to: [to],
         subject: subject,
         text: text,
+        html: htmlTemplate,
         attachments: resendAttachments.length > 0 ? resendAttachments : undefined,
       });
 
@@ -40,18 +117,18 @@ export async function POST(req: Request) {
     // Save to Prisma (Sent folder)
     const savedEmail = await prisma.emailRecord.create({
       data: {
-        from: "سفانة نجد <send@sfnaa.com>",
+        from: "سفانة نجد <info@sfnaa.com>",
         to: to,
         subject: subject,
         text: text,
-        html: `<p>${text.replace(/\\n/g, "<br>")}</p>`, // Simple text to HTML
+        html: htmlTemplate, 
         status: "sent",
         isRead: true, // Sent emails are naturally read by sender
         attachments: attachments || [],
       }
     });
 
-    return NextResponse.json({ success: true, id: savedEmail.id, data });
+    return NextResponse.json({ success: true, id: savedEmail.id, resendData });
   } catch (error) {
     console.error("Failed to send email:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
