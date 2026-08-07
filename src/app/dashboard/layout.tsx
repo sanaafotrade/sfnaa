@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import Link from "next/link";
 import { Inbox, Send, Settings, ShieldCheck, MailPlus, Globe, Layout, Users } from "lucide-react";
+import LogoutButton from "./LogoutButton";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
@@ -57,6 +58,10 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             <Settings className="w-5 h-5" />
             إعدادات البريد
           </Link>
+          
+          <div className="mt-4 border-t border-neutral-100 dark:border-neutral-800/50 pt-4">
+            <LogoutButton />
+          </div>
         </nav>
         
         <div className="p-4 border-t border-neutral-200 dark:border-neutral-800">
