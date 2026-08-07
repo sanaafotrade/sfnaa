@@ -9,7 +9,17 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     <LanguageProvider>
       <ThemeProvider>
         {children}
-        <Toaster richColors position="top-center" />
+        <Toaster 
+          richColors 
+          position="bottom-center" 
+          toastOptions={{
+            style: { 
+              padding: '16px', 
+              fontSize: '16px', 
+              borderRadius: '8px' 
+            }
+          }}
+        />
       </ThemeProvider>
     </LanguageProvider>
   );

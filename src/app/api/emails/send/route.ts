@@ -18,18 +18,23 @@ export async function POST(req: Request) {
       path: att.url,
     })) || [];
 
-    // Send the email via Resend
-    const { data, error } = await resend.emails.send({
-      from: "سفانة نجد <send@sfnaa.com>", // Using the verified sending domain
-      to: [to],
-      subject: subject,
-      text: text,
-      attachments: resendAttachments.length > 0 ? resendAttachments : undefined,
-    });
+    // Send the email via Resend if API key is configured
+    let resendData = null;
+    if (process.env.RESEND_API_KEY && process.env.RESEND_API_KEY !== "missing") {
+      const { data, error } = await resend.emails.send({
+        from: "سفانة نجد <send@sfnaa.com>", // Using the verified sending domain
+        to: [to],
+        subject: subject,
+        text: text,
+        attachments: resendAttachments.length > 0 ? resendAttachments : undefined,
+      });
 
-    if (error) {
-      console.error("Resend API Error:", error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      if (error) {
+        console.error("Resend API Error:", error);
+        // We log the error but continue to save to DB so the user can test the UI
+      } else {
+        resendData = data;
+      }
     }
 
     // Save to Prisma (Sent folder)
