@@ -86,7 +86,7 @@ export default async function SettingsPage() {
                   type="text" 
                   name="senderName"
                   defaultValue={settings.senderName}
-                  className="w-full bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 outline-none px-4 py-2 text-neutral-900 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-400"
                 />
               </div>
               <div>
@@ -95,7 +95,7 @@ export default async function SettingsPage() {
                   name="signature"
                   rows={3}
                   defaultValue={settings.signature}
-                  className="w-full bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 outline-none px-4 py-2 text-neutral-900 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-400"
                   placeholder="مثال: مع تحيات، فريق سفانة نجد..."
                 />
               </div>
@@ -120,7 +120,7 @@ export default async function SettingsPage() {
                   type="text" 
                   name="autoReplySubject"
                   defaultValue={settings.autoReplySubject}
-                  className="w-full bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 outline-none px-4 py-2 text-neutral-900 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-400"
                 />
               </div>
               <div>
@@ -129,7 +129,7 @@ export default async function SettingsPage() {
                   name="autoReplyBody"
                   rows={4}
                   defaultValue={settings.autoReplyBody}
-                  className="w-full bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 outline-none px-4 py-2 text-neutral-900 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-400"
                 />
               </div>
             </div>
@@ -147,7 +147,7 @@ export default async function SettingsPage() {
                 name="trustedEmails"
                 rows={5}
                 defaultValue={settings.trustedEmails.join("\n")}
-                className="w-full bg-green-50/50 dark:bg-green-900/10 border border-green-200 dark:border-green-900/30 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-green-500"
+                className="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 outline-none px-4 py-2 text-neutral-900 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-400"
                 placeholder="example@company.com"
               />
             </section>
@@ -162,7 +162,7 @@ export default async function SettingsPage() {
                 name="blockedEmails"
                 rows={5}
                 defaultValue={settings.blockedEmails.join("\n")}
-                className="w-full bg-red-50/50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-red-500"
+                className="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 outline-none px-4 py-2 text-neutral-900 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-400"
                 placeholder="spammer@bad.com"
               />
             </section>

@@ -124,23 +124,23 @@ export default function ServicesPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm mb-1">العنوان (عربي)</label>
-                  <input required type="text" value={currentService.titleAr || ''} onChange={e => setCurrentService({...currentService, titleAr: e.target.value})} className="w-full border rounded-lg px-4 py-2 bg-neutral-50 dark:bg-neutral-900" />
+                  <input required type="text" value={currentService.titleAr || ''} onChange={e => setCurrentService({...currentService, titleAr: e.target.value})} className="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 outline-none px-4 py-2 text-neutral-900 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-400" />
                 </div>
                 <div>
                   <label className="block text-sm mb-1">العنوان (إنجليزي)</label>
-                  <input required type="text" value={currentService.titleEn || ''} onChange={e => setCurrentService({...currentService, titleEn: e.target.value})} className="w-full border rounded-lg px-4 py-2 bg-neutral-50 dark:bg-neutral-900 text-left" dir="ltr" />
+                  <input required type="text" value={currentService.titleEn || ''} onChange={e => setCurrentService({...currentService, titleEn: e.target.value})} className="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 outline-none px-4 py-2 text-neutral-900 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-400" dir="ltr" dir="ltr" />
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-sm mb-1">الوصف (عربي)</label>
-                  <textarea required value={currentService.descAr || ''} onChange={e => setCurrentService({...currentService, descAr: e.target.value})} rows={3} className="w-full border rounded-lg px-4 py-2 bg-neutral-50 dark:bg-neutral-900" />
+                  <textarea required value={currentService.descAr || ''} onChange={e => setCurrentService({...currentService, descAr: e.target.value})} rows={3} className="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 outline-none px-4 py-2 text-neutral-900 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-400" />
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-sm mb-1">الوصف (إنجليزي)</label>
-                  <textarea required value={currentService.descEn || ''} onChange={e => setCurrentService({...currentService, descEn: e.target.value})} rows={3} className="w-full border rounded-lg px-4 py-2 bg-neutral-50 dark:bg-neutral-900 text-left" dir="ltr" />
+                  <textarea required value={currentService.descEn || ''} onChange={e => setCurrentService({...currentService, descEn: e.target.value})} rows={3} className="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 outline-none px-4 py-2 text-neutral-900 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-400" dir="ltr" dir="ltr" />
                 </div>
                 <div>
                   <label className="block text-sm mb-1">الترتيب</label>
-                  <input type="number" value={currentService.order || 0} onChange={e => setCurrentService({...currentService, order: e.target.value})} className="w-full border rounded-lg px-4 py-2 bg-neutral-50 dark:bg-neutral-900" />
+                  <input type="number" value={currentService.order || 0} onChange={e => setCurrentService({...currentService, order: e.target.value})} className="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 outline-none px-4 py-2 text-neutral-900 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-400" />
                 </div>
                 <div className="flex items-center mt-6">
                   <label className="flex items-center gap-2 cursor-pointer">
