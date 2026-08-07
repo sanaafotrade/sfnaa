@@ -75,7 +75,7 @@ export default function SiteSettingsPage() {
               </div>
               <div>
                 <label className="block text-sm mb-1">العنوان (إنجليزي)</label>
-                <input type="text" name="heroTitleEn" value={settings.heroTitleEn} onChange={handleChange} className="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 outline-none px-4 py-2 text-neutral-900 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-400" dir="ltr" dir="ltr" />
+                <input type="text" name="heroTitleEn" value={settings.heroTitleEn} onChange={handleChange} className="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 outline-none px-4 py-2 text-neutral-900 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-400" dir="ltr" />
               </div>
               <div className="md:col-span-2">
                 <label className="block text-sm mb-1">الوصف (عربي)</label>
@@ -83,7 +83,7 @@ export default function SiteSettingsPage() {
               </div>
               <div className="md:col-span-2">
                 <label className="block text-sm mb-1">الوصف (إنجليزي)</label>
-                <textarea name="heroDescEn" value={settings.heroDescEn} onChange={handleChange} rows={3} className="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 outline-none px-4 py-2 text-neutral-900 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-400" dir="ltr" dir="ltr" />
+                <textarea name="heroDescEn" value={settings.heroDescEn} onChange={handleChange} rows={3} className="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 outline-none px-4 py-2 text-neutral-900 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-400" dir="ltr" />
               </div>
             </div>
           </section>
@@ -97,7 +97,7 @@ export default function SiteSettingsPage() {
               </div>
               <div>
                 <label className="block text-sm mb-1">العنوان (إنجليزي)</label>
-                <input type="text" name="aboutTitleEn" value={settings.aboutTitleEn} onChange={handleChange} className="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 outline-none px-4 py-2 text-neutral-900 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-400" dir="ltr" dir="ltr" />
+                <input type="text" name="aboutTitleEn" value={settings.aboutTitleEn} onChange={handleChange} className="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 outline-none px-4 py-2 text-neutral-900 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-400" dir="ltr" />
               </div>
               <div className="md:col-span-2">
                 <label className="block text-sm mb-1">الوصف (عربي)</label>
@@ -105,7 +105,7 @@ export default function SiteSettingsPage() {
               </div>
               <div className="md:col-span-2">
                 <label className="block text-sm mb-1">الوصف (إنجليزي)</label>
-                <textarea name="aboutDescEn" value={settings.aboutDescEn} onChange={handleChange} rows={4} className="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 outline-none px-4 py-2 text-neutral-900 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-400" dir="ltr" dir="ltr" />
+                <textarea name="aboutDescEn" value={settings.aboutDescEn} onChange={handleChange} rows={4} className="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 outline-none px-4 py-2 text-neutral-900 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-400" dir="ltr" />
               </div>
             </div>
           </section>
@@ -129,11 +129,11 @@ export default function SiteSettingsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm mb-1">البريد الإلكتروني للتواصل</label>
-                <input type="email" name="contactEmail" value={settings.contactEmail} onChange={handleChange} className="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 outline-none px-4 py-2 text-neutral-900 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-400" dir="ltr" dir="ltr" />
+                <input type="email" name="contactEmail" value={settings.contactEmail} onChange={handleChange} className="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 outline-none px-4 py-2 text-neutral-900 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-400" dir="ltr" />
               </div>
               <div>
                 <label className="block text-sm mb-1">رقم الهاتف</label>
-                <input type="text" name="contactPhone" value={settings.contactPhone} onChange={handleChange} className="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 outline-none px-4 py-2 text-neutral-900 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-400" dir="ltr" dir="ltr" />
+                <input type="text" name="contactPhone" value={settings.contactPhone} onChange={handleChange} className="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 outline-none px-4 py-2 text-neutral-900 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-400" dir="ltr" />
               </div>
               <div className="md:col-span-2">
                 <label className="block text-sm mb-1">العنوان</label>

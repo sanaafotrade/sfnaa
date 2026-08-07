@@ -121,11 +121,11 @@ export default function PartnersPage() {
               </div>
               <div>
                 <label className="block text-sm mb-1">رابط الشعار (URL)</label>
-                <input type="text" value={currentPartner.logoUrl || ''} onChange={e => setCurrentPartner({...currentPartner, logoUrl: e.target.value})} className="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 outline-none px-4 py-2 text-neutral-900 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-400" dir="ltr" dir="ltr" />
+                <input type="text" value={currentPartner.logoUrl || ''} onChange={e => setCurrentPartner({...currentPartner, logoUrl: e.target.value})} className="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 outline-none px-4 py-2 text-neutral-900 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-400" dir="ltr" />
               </div>
               <div>
                 <label className="block text-sm mb-1">الموقع الإلكتروني</label>
-                <input type="text" value={currentPartner.websiteUrl || ''} onChange={e => setCurrentPartner({...currentPartner, websiteUrl: e.target.value})} className="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 outline-none px-4 py-2 text-neutral-900 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-400" dir="ltr" dir="ltr" />
+                <input type="text" value={currentPartner.websiteUrl || ''} onChange={e => setCurrentPartner({...currentPartner, websiteUrl: e.target.value})} className="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 outline-none px-4 py-2 text-neutral-900 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-400" dir="ltr" />
               </div>
               <div>
                 <label className="block text-sm mb-1">الترتيب</label>
