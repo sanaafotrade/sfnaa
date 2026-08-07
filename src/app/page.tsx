@@ -8,25 +8,40 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Globe, Moon, Sun, ArrowRight, ArrowLeft } from 'lucide-react';
 
+const defaultSettings = {
+  heroTitleAr: 'نربط العالم بصناعتك',
+  heroTitleEn: 'Connecting the World to Your Industry',
+  heroDescAr: 'سفانة نجد للتجارة، شريكك الموثوق في استيراد وتصدير المواد الخام وتوريد البلاستيك بأعلى معايير الجودة العالمية.',
+  heroDescEn: 'Safana Najd Trading, your trusted partner in importing and exporting raw materials and supplying plastics with the highest global quality standards.',
+  aboutTitleAr: 'من نحن',
+  aboutTitleEn: 'About Us',
+  aboutDescAr: 'نحن في سفانة نجد للتجارة نعتز بخبرتنا العميقة في مجال التجارة الدولية. تخصصنا الأساسي هو توفير أفضل المواد الخام اللازمة للصناعات المختلفة، مع التركيز بشكل خاص على قطاع البلاستيك.',
+  aboutDescEn: 'At Safana Najd Trading, we pride ourselves on our deep expertise in international trade. Our core specialty is providing the best raw materials for various industries, with a special focus on the plastics sector.',
+  contactEmail: 'info@sfnaa.com',
+  contactPhone: '+966 50 000 0000',
+  contactAddress: 'الرياض، المملكة العربية السعودية',
+  statsClients: '+50',
+  statsYears: '+15',
+  statsCountries: '+10',
+};
+
 export default function LandingPage() {
   const { lang, setLang, t } = useLanguage();
   const { theme, toggleTheme } = useTheme();
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<any>({ services: [], partners: [], settings: defaultSettings });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch('/api/landing')
       .then((res) => res.json())
-      .then((json) => setData(json))
-      .catch((err) => console.error(err));
+      .then((json) => {
+        if (json && json.settings) {
+          setData(json);
+        }
+      })
+      .catch((err) => console.error(err))
+      .finally(() => setLoading(false));
   }, []);
-
-  if (!data) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-16 h-16 border-4 border-gold border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    );
-  }
 
   const { services, partners, settings } = data;
 
