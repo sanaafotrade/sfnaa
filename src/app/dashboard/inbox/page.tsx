@@ -393,7 +393,7 @@ export default function EmailPage() {
                     value={composeTo}
                     onChange={e => setComposeTo(e.target.value)}
                     placeholder="email@example.com"
-                    className="w-full border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none"
+                    className="w-full border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none shadow-sm transition-colors"
                     dir="ltr"
                     required
                   />
@@ -406,7 +406,7 @@ export default function EmailPage() {
                   value={composeSubject}
                   onChange={e => setComposeSubject(e.target.value)}
                   placeholder={t({ ar: "عنوان الرسالة...", en: "Message subject..." })}
-                  className="w-full border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="w-full border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none shadow-sm transition-colors"
                   required
                 />
               </div>
@@ -423,7 +423,7 @@ export default function EmailPage() {
                 </div>
                 
                 {/* Rich Text Toolbar */}
-                <div className="flex flex-wrap items-center gap-1 p-2 bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 border-b-0 rounded-t-xl text-neutral-600 dark:text-neutral-300">
+                <div className="flex flex-wrap items-center gap-1 p-2 bg-neutral-50 dark:bg-neutral-900/80 border border-neutral-300 dark:border-neutral-600 border-b-0 rounded-t-xl text-neutral-600 dark:text-neutral-300 shadow-sm transition-colors">
                   <button type="button" onClick={() => document.execCommand("bold")} className="p-1.5 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded transition-colors" title="عريض"><Bold className="w-4 h-4" /></button>
                   <button type="button" onClick={() => document.execCommand("italic")} className="p-1.5 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded transition-colors" title="مائل"><Italic className="w-4 h-4" /></button>
                   <button type="button" onClick={() => document.execCommand("underline")} className="p-1.5 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded transition-colors" title="تحته خط"><Underline className="w-4 h-4" /></button>
@@ -440,7 +440,7 @@ export default function EmailPage() {
                   ref={editorRef}
                   contentEditable
                   onInput={(e) => setComposeBody(e.currentTarget.innerHTML)}
-                  className="w-full min-h-[300px] border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white rounded-b-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none overflow-y-auto prose dark:prose-invert max-w-none"
+                  className="w-full min-h-[300px] border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white rounded-b-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none overflow-y-auto prose dark:prose-invert max-w-none shadow-sm transition-colors"
                   dir="auto"
                 />
               </div>
