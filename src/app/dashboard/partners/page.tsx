@@ -108,7 +108,7 @@ export default function PartnersPage() {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white dark:bg-neutral-950 rounded-2xl max-w-md w-full">
             <div className="flex justify-between items-center p-6 border-b border-neutral-200 dark:border-neutral-800">
-              <h3 className="text-xl font-bold">{currentPartner.id ? 'تعديل الشريك' : 'إضافة شريك جديد'}</h3>
+              <h3 className="text-xl font-bold text-neutral-900 dark:text-white">{currentPartner.id ? 'تعديل الشريك' : 'إضافة شريك جديد'}</h3>
               <button onClick={() => setIsEditing(false)} className="text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 p-2 rounded-lg">
                 <X className="w-5 h-5" />
               </button>
@@ -116,19 +116,19 @@ export default function PartnersPage() {
             
             <form onSubmit={handleSave} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm mb-1">اسم الشريك</label>
+                <label className="block text-sm mb-1 text-neutral-700 dark:text-neutral-300 font-medium">اسم الشريك</label>
                 <input required type="text" value={currentPartner.name || ''} onChange={e => setCurrentPartner({...currentPartner, name: e.target.value})} className="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 outline-none px-4 py-2 text-neutral-900 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-400" />
               </div>
               <div>
-                <label className="block text-sm mb-1">رابط الشعار (URL)</label>
+                <label className="block text-sm mb-1 text-neutral-700 dark:text-neutral-300 font-medium">رابط الشعار (URL)</label>
                 <input type="text" value={currentPartner.logoUrl || ''} onChange={e => setCurrentPartner({...currentPartner, logoUrl: e.target.value})} className="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 outline-none px-4 py-2 text-neutral-900 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-400" dir="ltr" />
               </div>
               <div>
-                <label className="block text-sm mb-1">الموقع الإلكتروني</label>
+                <label className="block text-sm mb-1 text-neutral-700 dark:text-neutral-300 font-medium">الموقع الإلكتروني</label>
                 <input type="text" value={currentPartner.websiteUrl || ''} onChange={e => setCurrentPartner({...currentPartner, websiteUrl: e.target.value})} className="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 outline-none px-4 py-2 text-neutral-900 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-400" dir="ltr" />
               </div>
               <div>
-                <label className="block text-sm mb-1">الترتيب</label>
+                <label className="block text-sm mb-1 text-neutral-700 dark:text-neutral-300 font-medium">الترتيب</label>
                 <input type="number" value={currentPartner.order || 0} onChange={e => setCurrentPartner({...currentPartner, order: e.target.value})} className="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 outline-none px-4 py-2 text-neutral-900 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-400" />
               </div>
               <div className="flex items-center mt-2">

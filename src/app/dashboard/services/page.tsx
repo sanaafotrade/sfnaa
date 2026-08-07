@@ -114,7 +114,7 @@ export default function ServicesPage() {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white dark:bg-neutral-950 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center p-6 border-b border-neutral-200 dark:border-neutral-800">
-              <h3 className="text-xl font-bold">{currentService.id ? 'تعديل الخدمة' : 'إضافة خدمة جديدة'}</h3>
+              <h3 className="text-xl font-bold text-neutral-900 dark:text-white">{currentService.id ? 'تعديل الخدمة' : 'إضافة خدمة جديدة'}</h3>
               <button onClick={() => setIsEditing(false)} className="text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800 p-2 rounded-lg">
                 <X className="w-5 h-5" />
               </button>
@@ -123,27 +123,27 @@ export default function ServicesPage() {
             <form onSubmit={handleSave} className="p-6 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm mb-1">العنوان (عربي)</label>
+                  <label className="block text-sm mb-1 text-neutral-700 dark:text-neutral-300 font-medium">العنوان (عربي)</label>
                   <input required type="text" value={currentService.titleAr || ''} onChange={e => setCurrentService({...currentService, titleAr: e.target.value})} className="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 outline-none px-4 py-2 text-neutral-900 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-400" />
                 </div>
                 <div>
-                  <label className="block text-sm mb-1">العنوان (إنجليزي)</label>
+                  <label className="block text-sm mb-1 text-neutral-700 dark:text-neutral-300 font-medium">العنوان (إنجليزي)</label>
                   <input required type="text" value={currentService.titleEn || ''} onChange={e => setCurrentService({...currentService, titleEn: e.target.value})} className="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 outline-none px-4 py-2 text-neutral-900 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-400" dir="ltr" />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-sm mb-1">الوصف (عربي)</label>
+                  <label className="block text-sm mb-1 text-neutral-700 dark:text-neutral-300 font-medium">الوصف (عربي)</label>
                   <textarea required value={currentService.descAr || ''} onChange={e => setCurrentService({...currentService, descAr: e.target.value})} rows={3} className="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 outline-none px-4 py-2 text-neutral-900 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-400" />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-sm mb-1">الوصف (إنجليزي)</label>
+                  <label className="block text-sm mb-1 text-neutral-700 dark:text-neutral-300 font-medium">الوصف (إنجليزي)</label>
                   <textarea required value={currentService.descEn || ''} onChange={e => setCurrentService({...currentService, descEn: e.target.value})} rows={3} className="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 outline-none px-4 py-2 text-neutral-900 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-400" dir="ltr" />
                 </div>
                 <div>
-                  <label className="block text-sm mb-1">الترتيب</label>
+                  <label className="block text-sm mb-1 text-neutral-700 dark:text-neutral-300 font-medium">الترتيب</label>
                   <input type="number" value={currentService.order || 0} onChange={e => setCurrentService({...currentService, order: e.target.value})} className="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 outline-none px-4 py-2 text-neutral-900 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-400" />
                 </div>
                 <div>
-                  <label className="block text-sm mb-1">الأيقونة أو رابط الصورة</label>
+                  <label className="block text-sm mb-1 text-neutral-700 dark:text-neutral-300 font-medium">الأيقونة أو رابط الصورة</label>
                   <input type="text" value={currentService.icon || ''} onChange={e => setCurrentService({...currentService, icon: e.target.value})} className="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 outline-none px-4 py-2 text-neutral-900 dark:text-white rounded-lg focus:border-blue-500 dark:focus:border-blue-400" dir="ltr" placeholder="Globe" />
                 </div>
                 <div className="flex items-center mt-6">
