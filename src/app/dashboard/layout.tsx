@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Inbox, Send, Settings, ShieldCheck, MailPlus, Globe, Layout, Users, LayoutDashboard, Moon, Sun, Languages, Plus } from "lucide-react";
@@ -12,12 +12,33 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const { lang, setLang, t } = useLanguage();
   const { theme, toggleTheme } = useTheme();
   const pathname = usePathname();
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const isRtl = lang === "ar";
   
   const toggleLanguage = () => {
     setLang(lang === "ar" ? "en" : "ar");
   };
+
+  useEffect(() => {
+    const checkUnread = async () => {
+      try {
+        const res = await fetch("/api/emails/unread-count");
+        if (res.ok) {
+          const data = await res.json();
+          if (typeof data.count === "number") {
+            setUnreadCount(data.count);
+          }
+        }
+      } catch (e) {
+        // Silent catch
+      }
+    };
+
+    checkUnread();
+    const interval = setInterval(checkUnread, 10000); // Poll every 10s
+    return () => clearInterval(interval);
+  }, []);
 
   const navLinkClass = (path: string) => {
     const isActive = pathname === path;
@@ -44,7 +65,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           {/* Overview */}
           <Link href="/dashboard" className={navLinkClass("/dashboard")}>
             <LayoutDashboard className="w-5 h-5" />
-            {t({ ar: "الرئيسية", en: "Overview" })}
+            <span className="flex-1">{t({ ar: "الرئيسية", en: "Overview" })}</span>
           </Link>
           
           {/* Mail Section */}
@@ -54,7 +75,15 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           
           <Link href="/dashboard/inbox" className={navLinkClass("/dashboard/inbox")}>
             <Inbox className="w-5 h-5" />
-            {t({ ar: "البريد الإلكتروني", en: "Email" })}
+            <span className="flex-1">{t({ ar: "البريد الإلكتروني", en: "Email" })}</span>
+            {unreadCount > 0 && (
+              <span className="relative flex h-5 w-5 items-center justify-center mr-auto ml-2" dir="ltr">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-4 w-4 bg-red-500 text-[10px] font-bold text-white items-center justify-center">
+                  {unreadCount > 9 ? "+9" : unreadCount}
+                </span>
+              </span>
+            )}
           </Link>
           
           {/* Website Section */}
