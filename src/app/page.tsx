@@ -56,31 +56,31 @@ export default function LandingPage() {
     <div className="min-h-screen flex flex-col">
       {/* Header */}
       <header className="sticky top-0 z-50 glass w-full transition-colors duration-300">
-        <div className="container mx-auto px-4 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Globe className="w-8 h-8 text-gold" />
-            <span className="font-bold text-xl md:text-2xl">
+        <div className="container mx-auto px-6 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Globe className="w-10 h-10 text-gold" />
+            <span className="font-extrabold text-2xl md:text-3xl">
               {lang === 'ar' ? 'سفانة نجد' : 'Safana Najd'}
             </span>
           </div>
           
-          <nav className="hidden md:flex items-center gap-6">
-            <a href="#home" className="hover:text-gold transition-colors">{t({ ar: 'الرئيسية', en: 'Home' })}</a>
+          <nav className="hidden md:flex items-center gap-8">
+            <a href="#home" className="text-base font-bold hover:text-gold transition-colors">{t({ ar: 'الرئيسية', en: 'Home' })}</a>
             {services?.length > 0 && (
-              <a href="#services" className="hover:text-gold transition-colors">{t({ ar: 'خدماتنا', en: 'Services' })}</a>
+              <a href="#services" className="text-base font-bold hover:text-gold transition-colors">{t({ ar: 'خدماتنا', en: 'Services' })}</a>
             )}
-            <a href="#about" className="hover:text-gold transition-colors">{t({ ar: 'من نحن', en: 'About Us' })}</a>
-            <a href="#contact" className="hover:text-gold transition-colors">{t({ ar: 'تواصل معنا', en: 'Contact' })}</a>
+            <a href="#about" className="text-base font-bold hover:text-gold transition-colors">{t({ ar: 'من نحن', en: 'About Us' })}</a>
+            <a href="#contact" className="text-base font-bold hover:text-gold transition-colors">{t({ ar: 'تواصل معنا', en: 'Contact' })}</a>
           </nav>
 
           <div className="flex items-center gap-4">
-            <button onClick={toggleLang} className="font-semibold text-sm hover:text-gold transition-colors">
+            <button onClick={toggleLang} className="font-bold text-base hover:text-gold transition-colors">
               {lang === 'ar' ? 'EN' : 'عربي'}
             </button>
             <button onClick={toggleTheme} className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-              {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+              {theme === 'light' ? <Moon className="w-6 h-6" /> : <Sun className="w-6 h-6" />}
             </button>
-            <Link href="/login" className="px-4 py-2 bg-gold text-white rounded-lg font-medium hover:bg-gold-light transition-colors">
+            <Link href="/login" className="px-6 py-2.5 bg-gold text-white rounded-xl font-bold text-base hover:bg-gold-light transition-colors">
               {t({ ar: 'تسجيل الدخول', en: 'Login' })}
             </Link>
           </div>
@@ -92,28 +92,28 @@ export default function LandingPage() {
         <section id="home" className="relative h-[90vh] flex items-center justify-center overflow-hidden">
           <div className="absolute inset-0 z-0">
             <Image src="/images/hero.jpg" alt="Hero" fill className="object-cover" priority />
-            <div className={`absolute inset-0 ${theme === 'light' ? 'bg-white/70' : 'bg-primary/80'}`}></div>
+            <div className="absolute inset-0 bg-gradient-to-b from-primary/70 via-primary/50 to-primary/80"></div>
           </div>
           
-          <div className="container mx-auto px-4 z-10 relative">
+          <div className="container mx-auto px-6 z-10 relative">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
-              className="max-w-3xl text-center mx-auto"
+              className="max-w-4xl text-center mx-auto"
             >
-              <h1 className="text-4xl md:text-6xl font-bold mb-6 text-gradient leading-tight">
+              <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold mb-8 text-gradient leading-tight">
                 {lang === 'ar' ? settings.heroTitleAr : settings.heroTitleEn}
               </h1>
-              <p className="text-lg md:text-xl mb-10 opacity-90 leading-relaxed">
+              <p className="text-xl md:text-2xl mb-12 text-white/90 leading-relaxed max-w-3xl mx-auto">
                 {lang === 'ar' ? settings.heroDescAr : settings.heroDescEn}
               </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <a href="#contact" className="w-full sm:w-auto px-8 py-4 bg-gold text-white rounded-lg font-bold hover:bg-gold-light transition-all flex items-center justify-center gap-2">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-5">
+                <a href="#contact" className="w-full sm:w-auto px-10 py-5 bg-gold text-white rounded-xl font-bold text-lg hover:bg-gold-light hover:scale-105 transition-all flex items-center justify-center gap-3 shadow-lg shadow-gold/30">
                   {t({ ar: 'تواصل معنا', en: 'Contact Us' })}
-                  <ArrowIcon className="w-5 h-5" />
+                  <ArrowIcon className="w-6 h-6" />
                 </a>
-                <a href="#about" className="w-full sm:w-auto px-8 py-4 glass-card rounded-lg font-bold hover:bg-black/5 dark:hover:bg-white/10 transition-all text-center">
+                <a href="#about" className="w-full sm:w-auto px-10 py-5 bg-white/10 backdrop-blur-sm border border-white/20 text-white rounded-xl font-bold text-lg hover:bg-white/20 transition-all text-center">
                   {t({ ar: 'اعرف المزيد', en: 'Learn More' })}
                 </a>
               </div>
