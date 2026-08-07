@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Cairo } from "next/font/google";
 import "./globals.css";
 import Providers from "./providers";
 
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
+const cairo = Cairo({
+  variable: "--font-cairo",
+  subsets: ["arabic", "latin"],
 });
 
 export const metadata: Metadata = {
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ar" dir="rtl" className={`${inter.variable} antialiased scroll-smooth`}>
+    <html lang="ar" dir="rtl" className={`${cairo.variable} antialiased scroll-smooth`}>
       <body className="min-h-screen flex flex-col font-sans">
         <Providers>
           {children}

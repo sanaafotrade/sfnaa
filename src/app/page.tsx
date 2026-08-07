@@ -56,31 +56,31 @@ export default function LandingPage() {
     <div className="min-h-screen flex flex-col">
       {/* Header */}
       <header className="sticky top-0 z-50 glass w-full transition-colors duration-300">
-        <div className="container mx-auto px-6 h-20 flex items-center justify-between">
+        <div className="container mx-auto px-6 h-24 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Globe className="w-10 h-10 text-gold" />
-            <span className="font-extrabold text-2xl md:text-3xl">
+            <Globe className="w-12 h-12 text-gold" />
+            <span className="font-extrabold text-3xl md:text-4xl">
               {lang === 'ar' ? 'سفانة نجد' : 'Safana Najd'}
             </span>
           </div>
           
-          <nav className="hidden md:flex items-center gap-8">
-            <a href="#home" className="text-base font-bold hover:text-gold transition-colors">{t({ ar: 'الرئيسية', en: 'Home' })}</a>
+          <nav className="hidden md:flex items-center gap-10">
+            <a href="#home" className="text-lg font-bold hover:text-gold transition-colors">{t({ ar: 'الرئيسية', en: 'Home' })}</a>
             {services?.length > 0 && (
-              <a href="#services" className="text-base font-bold hover:text-gold transition-colors">{t({ ar: 'خدماتنا', en: 'Services' })}</a>
+              <a href="#services" className="text-lg font-bold hover:text-gold transition-colors">{t({ ar: 'خدماتنا', en: 'Services' })}</a>
             )}
-            <a href="#about" className="text-base font-bold hover:text-gold transition-colors">{t({ ar: 'من نحن', en: 'About Us' })}</a>
-            <a href="#contact" className="text-base font-bold hover:text-gold transition-colors">{t({ ar: 'تواصل معنا', en: 'Contact' })}</a>
+            <a href="#about" className="text-lg font-bold hover:text-gold transition-colors">{t({ ar: 'من نحن', en: 'About Us' })}</a>
+            <a href="#contact" className="text-lg font-bold hover:text-gold transition-colors">{t({ ar: 'تواصل معنا', en: 'Contact' })}</a>
           </nav>
 
-          <div className="flex items-center gap-4">
-            <button onClick={toggleLang} className="font-bold text-base hover:text-gold transition-colors">
+          <div className="flex items-center gap-6">
+            <button onClick={toggleLang} className="font-bold text-lg hover:text-gold transition-colors">
               {lang === 'ar' ? 'EN' : 'عربي'}
             </button>
             <button onClick={toggleTheme} className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-              {theme === 'light' ? <Moon className="w-6 h-6" /> : <Sun className="w-6 h-6" />}
+              {theme === 'light' ? <Moon className="w-7 h-7" /> : <Sun className="w-7 h-7" />}
             </button>
-            <Link href="/login" className="px-6 py-2.5 bg-gold text-white rounded-xl font-bold text-base hover:bg-gold-light transition-colors">
+            <Link href="/login" className="px-8 py-3 bg-gold text-white rounded-xl font-bold text-lg hover:bg-gold-light transition-colors">
               {t({ ar: 'تسجيل الدخول', en: 'Login' })}
             </Link>
           </div>
