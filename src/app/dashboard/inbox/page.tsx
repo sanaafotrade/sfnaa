@@ -112,8 +112,20 @@ export default function EmailPage() {
   }, [activeFolder]);
 
   // ============ Email Actions ============
-  const handleOpenEmail = (email: EmailRecord) => {
+  const handleOpenEmail = async (email: EmailRecord) => {
     setSelectedEmail(email);
+    if (!email.isRead) {
+      try {
+        await fetch(`/api/emails/${email.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ isRead: true })
+        });
+        setEmails(prev => prev.map(em => em.id === email.id ? { ...em, isRead: true } : em));
+      } catch (e) {
+        console.error("Failed to mark as read", e);
+      }
+    }
   };
 
   const handleToggleStar = async (e: React.MouseEvent, email: EmailRecord) => {
