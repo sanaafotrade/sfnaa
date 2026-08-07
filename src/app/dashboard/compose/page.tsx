@@ -82,7 +82,7 @@ export default function ComposePage() {
               required
               value={to}
               onChange={(e) => setTo(e.target.value)}
-              className="flex-1 bg-transparent border-none outline-none p-2 text-neutral-800 dark:text-neutral-200" 
+              className="flex-1 bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 outline-none p-2 text-neutral-900 dark:text-white rounded-md focus:border-blue-500 dark:focus:border-blue-400" 
               placeholder="example@domain.com"
             />
           </div>
@@ -94,7 +94,7 @@ export default function ComposePage() {
               required
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
-              className="flex-1 bg-transparent border-none outline-none p-2 text-neutral-800 dark:text-neutral-200 font-semibold" 
+              className="flex-1 bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 outline-none p-2 text-neutral-900 dark:text-white rounded-md font-semibold focus:border-blue-500 dark:focus:border-blue-400" 
               placeholder="اكتب عنوان الرسالة..."
             />
           </div>
@@ -104,7 +104,7 @@ export default function ComposePage() {
               required
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              className="flex-1 w-full bg-transparent border-none outline-none resize-none text-neutral-800 dark:text-neutral-200 leading-relaxed"
+              className="flex-1 w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 outline-none resize-none text-neutral-900 dark:text-white p-3 rounded-md leading-relaxed focus:border-blue-500 dark:focus:border-blue-400"
               placeholder="اكتب رسالتك هنا..."
             />
           </div>
