@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { Resend } from "resend";
 
 export async function POST(req: Request) {
   try {
     const payload = await req.json();
+    const resend = new Resend(process.env.RESEND_API_KEY || "missing");
 
     // Resend webhook payload structure
     if (payload.type === "email.received" && payload.data) {
@@ -11,14 +13,30 @@ export async function POST(req: Request) {
       
       const toField = Array.isArray(emailData.to) ? emailData.to.join(", ") : (emailData.to || "");
       
+      // The webhook payload only contains metadata. We must fetch the actual content.
+      let textContent = "";
+      let htmlContent = "";
+      
+      if (emailData.email_id && process.env.RESEND_API_KEY) {
+        try {
+          const { data: fetchedEmail } = await resend.emails.get(emailData.email_id);
+          if (fetchedEmail) {
+            textContent = fetchedEmail.text || "";
+            htmlContent = fetchedEmail.html || "";
+          }
+        } catch (fetchError) {
+          console.error("Failed to fetch email content:", fetchError);
+        }
+      }
+      
       // Save incoming email to Inbox
       await prisma.emailRecord.create({
         data: {
           from: emailData.from || "unknown@sender.com",
           to: toField,
           subject: emailData.subject || "No Subject",
-          text: emailData.text || "",
-          html: emailData.html || "",
+          text: textContent,
+          html: htmlContent,
           status: "inbox",
           isRead: false,
           attachments: emailData.attachments || [],
