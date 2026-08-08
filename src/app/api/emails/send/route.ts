@@ -58,19 +58,6 @@ export async function POST(req: Request) {
       font-size: 16px;
       line-height: 1.6;
     }
-    .footer {
-      background-color: #fafafa;
-      padding: 24px;
-      text-align: center;
-      font-size: 13px;
-      color: #71717a;
-      border-top: 1px solid #e4e4e7;
-      line-height: 1.5;
-    }
-    .brand {
-      font-weight: 600;
-      color: #09090b;
-    }
     .content-body {
       white-space: pre-wrap;
     }
@@ -83,11 +70,6 @@ export async function POST(req: Request) {
     </div>
     <div class="content">
       <div class="content-body">${text}</div>
-    </div>
-    <div class="footer">
-      <p>هذه رسالة تلقائية من نظام <span class="brand">سفانة نجد</span> للتجارة والمقاولات.</p>
-      <p>This is an automated message from Safana Najd Trading & Contracting.</p>
-      <p style="margin-top: 12px; font-size: 12px; color: #a1a1aa;">© ${new Date().getFullYear()} Safana Najd. All rights reserved.</p>
     </div>
   </div>
 </body>

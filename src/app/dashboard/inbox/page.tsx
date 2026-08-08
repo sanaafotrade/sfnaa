@@ -91,24 +91,30 @@ export default function EmailPage() {
   const editorRef = useRef<HTMLDivElement>(null);
 
   // ============ Data Loading ============
-  const loadEmails = async () => {
-    setIsLoading(true);
+  const loadEmails = async (showLoader = true) => {
+    if (showLoader) setIsLoading(true);
     try {
-      const res = await fetch(`/api/emails?tab=${activeFolder}`);
+      const res = await fetch(`/api/emails?tab=${activeFolder}&t=${Date.now()}`, { cache: 'no-store' });
       const data = await res.json();
       setEmails(Array.isArray(data) ? data : []);
     } catch {
-      toast.error("حدث خطأ أثناء تحميل الرسائل");
-      setEmails([]);
+      if (showLoader) toast.error("حدث خطأ أثناء تحميل الرسائل");
+      else setEmails([]);
     } finally {
-      setIsLoading(false);
+      if (showLoader) setIsLoading(false);
     }
   };
 
   useEffect(() => {
     setSelectedEmail(null);
     setSelectedIds(new Set());
-    loadEmails();
+    loadEmails(true);
+
+    const interval = setInterval(() => {
+      loadEmails(false);
+    }, 10000);
+    
+    return () => clearInterval(interval);
   }, [activeFolder]);
 
   // ============ Email Actions ============
@@ -368,10 +374,43 @@ export default function EmailPage() {
                 <div className="flex items-center gap-1">
                   <span className="text-xs text-neutral-500 ml-2">{selectedIds.size} {t({ ar: "محدد", en: "selected" })}</span>
                   <div className="h-4 w-px bg-neutral-200 dark:bg-neutral-700 mx-1" />
-                  <button onClick={() => {}} title={t({ ar: "تعليم مقروء", en: "Mark Read" })} className="p-1.5 text-neutral-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors">
+                  <button 
+                    onClick={async () => {
+                      try {
+                        const ids = Array.from(selectedIds);
+                        const isAllRead = ids.every(id => emails.find(e => e.id === id)?.isRead);
+                        const action = isAllRead ? "markUnread" : "markRead";
+                        await fetch("/api/emails/bulk", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ action, ids })
+                        });
+                        setEmails(prev => prev.map(e => ids.includes(e.id) ? { ...e, isRead: action === "markRead" } : e));
+                        setSelectedIds(new Set());
+                      } catch { toast.error("حدث خطأ"); }
+                    }} 
+                    title={t({ ar: "تعليم مقروء / غير مقروء", en: "Toggle Read/Unread" })} 
+                    className="p-1.5 text-neutral-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                  >
                     <MailOpen className="w-4 h-4" />
                   </button>
-                  <button onClick={() => {}} title={t({ ar: "حذف", en: "Delete" })} className="p-1.5 text-neutral-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
+                  <button 
+                    onClick={async () => {
+                      if (!confirm("هل أنت متأكد من حذف هذه الرسائل؟")) return;
+                      try {
+                        const ids = Array.from(selectedIds);
+                        await fetch("/api/emails/bulk", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ action: "delete", ids })
+                        });
+                        setEmails(prev => prev.filter(e => !ids.includes(e.id)));
+                        setSelectedIds(new Set());
+                      } catch { toast.error("حدث خطأ في الحذف"); }
+                    }} 
+                    title={t({ ar: "حذف", en: "Delete" })} 
+                    className="p-1.5 text-neutral-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                  >
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
@@ -544,18 +583,21 @@ export default function EmailPage() {
                     {t({ ar: "المرفقات", en: "Attachments" })} ({selectedEmail.attachments.length})
                   </h3>
                   <div className="flex flex-wrap gap-3">
-                    {selectedEmail.attachments.map((att: any, i: number) => (
-                      <a
-                        key={i}
-                        href={att.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-3 p-3 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
-                      >
-                        {getFileIcon(att.filename)}
-                        <span className="text-sm font-medium text-neutral-700 dark:text-neutral-200">{att.filename}</span>
-                      </a>
-                    ))}
+                    {selectedEmail.attachments.map((att: any, i: number) => {
+                      const href = att.url || (att.id && att.email_id ? `/api/emails/attachments/${att.email_id}/${att.id}` : (att.id ? `/api/emails/attachments/${selectedEmail.id}/${att.id}` : "#"));
+                      return (
+                        <a
+                          key={i}
+                          href={href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-3 p-3 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+                        >
+                          {getFileIcon(att.filename)}
+                          <span className="text-sm font-medium text-neutral-700 dark:text-neutral-200">{att.filename}</span>
+                        </a>
+                      );
+                    })}
                   </div>
                 </div>
               )}

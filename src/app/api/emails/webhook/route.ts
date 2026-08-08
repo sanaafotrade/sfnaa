@@ -50,7 +50,10 @@ export async function POST(req: Request) {
           html: htmlContent,
           status: "inbox",
           isRead: false,
-          attachments: emailData.attachments || [],
+          attachments: (emailData.attachments || []).map((att: any) => ({
+            ...att,
+            email_id: emailData.email_id // Needed for fetching the actual file later
+          })),
         }
       });
 
