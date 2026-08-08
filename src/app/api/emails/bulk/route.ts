@@ -11,6 +11,11 @@ export async function POST(req: Request) {
     }
 
     if (action === "delete") {
+      await prisma.emailRecord.updateMany({
+        where: { id: { in: ids } },
+        data: { status: "trash" }
+      });
+    } else if (action === "hardDelete") {
       await prisma.emailRecord.deleteMany({
         where: { id: { in: ids } },
       });
