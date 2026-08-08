@@ -588,16 +588,21 @@ export default function EmailPage() {
                     <div
                       key={email.id}
                       onClick={() => handleOpenEmail(email)}
-                      className={`flex items-center gap-4 px-4 py-3 cursor-pointer transition-all hover:bg-blue-50/50 dark:hover:bg-blue-900/10 ${
+                      className={`relative flex items-center gap-4 px-4 py-3 cursor-pointer transition-all hover:bg-blue-50/50 dark:hover:bg-blue-900/10 border-r-4 ${
                         !email.isRead && email.status === "inbox"
-                          ? "bg-white dark:bg-neutral-950 font-semibold"
-                          : "bg-neutral-50/30 dark:bg-neutral-950/50"
+                          ? "bg-white dark:bg-neutral-900 font-bold border-blue-600 shadow-[0_1px_3px_rgba(0,0,0,0.05)] z-10"
+                          : "bg-neutral-50/30 dark:bg-neutral-950/50 border-transparent"
                       }`}
                     >
+                      {/* Unread indicator dot */}
+                      {!email.isRead && email.status === "inbox" && (
+                        <div className="absolute top-1/2 -translate-y-1/2 right-1.5 w-2 h-2 bg-blue-600 rounded-full shadow-[0_0_8px_rgba(37,99,235,0.6)] animate-pulse" />
+                      )}
+
                       {/* Checkbox */}
                       <button
                         onClick={e => { e.stopPropagation(); toggleSelect(email.id); }}
-                        className="text-neutral-400 hover:text-blue-600 transition-colors shrink-0"
+                        className="text-neutral-400 hover:text-blue-600 transition-colors shrink-0 mr-2"
                       >
                         {selectedIds.has(email.id) ? (
                           <SquareCheck className="w-5 h-5 text-blue-600" />
@@ -627,10 +632,10 @@ export default function EmailPage() {
                           </p>
                         </div>
                         <div className="col-span-7">
-                          <p className={`text-sm truncate ${!email.isRead && email.status === "inbox" ? "font-semibold text-neutral-800 dark:text-neutral-200" : "text-neutral-600 dark:text-neutral-400"}`}>
+                          <p className={`text-sm truncate ${!email.isRead && email.status === "inbox" ? "font-bold text-neutral-900 dark:text-white" : "text-neutral-600 dark:text-neutral-400"}`}>
                             {email.subject || "(بدون عنوان)"}
                           </p>
-                          <p className="text-xs text-neutral-400 truncate mt-0.5">
+                          <p className={`text-xs truncate mt-0.5 ${!email.isRead && email.status === "inbox" ? "text-neutral-500 dark:text-neutral-400" : "text-neutral-400 dark:text-neutral-500"}`}>
                             {getPreviewText(email)}
                           </p>
                         </div>

@@ -19,10 +19,21 @@ export async function POST(req: Request) {
       
       if (emailData.email_id && process.env.RESEND_API_KEY) {
         try {
-          const { data: fetchedEmail } = await resend.emails.get(emailData.email_id);
-          if (fetchedEmail) {
+          // Use standard fetch to ensure we hit the correct /emails/receiving endpoint
+          // as some SDK versions might not fully support inbound emails yet.
+          const res = await fetch(`https://api.resend.com/emails/receiving/${emailData.email_id}`, {
+            headers: {
+              Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+              "Content-Type": "application/json",
+            }
+          });
+          
+          if (res.ok) {
+            const fetchedEmail = await res.json();
             textContent = fetchedEmail.text || "";
             htmlContent = fetchedEmail.html || "";
+          } else {
+            console.error("Failed to fetch inbound email, status:", res.status);
           }
         } catch (fetchError) {
           console.error("Failed to fetch email content:", fetchError);
