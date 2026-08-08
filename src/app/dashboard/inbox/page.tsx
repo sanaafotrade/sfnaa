@@ -82,6 +82,8 @@ export default function EmailPage() {
 
   // Compose state
   const [showCompose, setShowCompose] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [composeTo, setComposeTo] = useState("");
   const [composeSubject, setComposeSubject] = useState("");
   const [composeBody, setComposeBody] = useState("");
@@ -306,6 +308,56 @@ export default function EmailPage() {
         </div>
       )}
 
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-neutral-900 rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl border border-neutral-200 dark:border-neutral-800 p-6 text-center">
+            <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+              <AlertTriangle className="w-8 h-8 text-red-600 dark:text-red-500" />
+            </div>
+            <h3 className="text-lg font-bold text-neutral-900 dark:text-white mb-2">
+              يعرض موقع sfnaa.com
+            </h3>
+            <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-6">
+              هل أنت متأكد من حذف هذه الرسائل؟
+            </p>
+            <div className="flex gap-3 justify-center">
+              <button 
+                onClick={() => setShowDeleteConfirm(false)}
+                className="px-6 py-2 rounded-xl text-neutral-600 dark:text-neutral-300 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 font-medium transition-colors"
+                disabled={isDeleting}
+              >
+                إلغاء
+              </button>
+              <button 
+                onClick={async () => {
+                  setIsDeleting(true);
+                  try {
+                    const ids = Array.from(selectedIds);
+                    await fetch("/api/emails/bulk", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ action: "delete", ids })
+                    });
+                    setEmails(prev => prev.filter(e => !ids.includes(e.id)));
+                    setSelectedIds(new Set());
+                    setShowDeleteConfirm(false);
+                  } catch { 
+                    toast.error("حدث خطأ في الحذف"); 
+                  } finally {
+                    setIsDeleting(false);
+                  }
+                }}
+                className="px-6 py-2 rounded-xl text-white bg-blue-600 hover:bg-blue-700 font-medium transition-colors flex items-center justify-center min-w-[100px]"
+                disabled={isDeleting}
+              >
+                {isDeleting ? <Loader2 className="w-5 h-5 animate-spin" /> : "حسناً"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Main Container */}
       <div className="flex-1 flex flex-col overflow-hidden bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-2xl shadow-sm">
         {/* Folder Tabs + Toolbar */}
@@ -395,19 +447,7 @@ export default function EmailPage() {
                     <MailOpen className="w-4 h-4" />
                   </button>
                   <button 
-                    onClick={async () => {
-                      if (!confirm("هل أنت متأكد من حذف هذه الرسائل؟")) return;
-                      try {
-                        const ids = Array.from(selectedIds);
-                        await fetch("/api/emails/bulk", {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({ action: "delete", ids })
-                        });
-                        setEmails(prev => prev.filter(e => !ids.includes(e.id)));
-                        setSelectedIds(new Set());
-                      } catch { toast.error("حدث خطأ في الحذف"); }
-                    }} 
+                    onClick={() => setShowDeleteConfirm(true)} 
                     title={t({ ar: "حذف", en: "Delete" })} 
                     className="p-1.5 text-neutral-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                   >
