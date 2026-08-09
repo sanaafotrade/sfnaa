@@ -571,43 +571,60 @@ export default function EmailPage() {
           </div>
         ) : selectedEmail ? (
           /* ========== EMAIL VIEW ========== */
-          <div className="flex flex-col flex-1 overflow-y-auto">
-            <div className="px-6 py-4 border-b border-neutral-100 dark:border-neutral-800 flex items-center justify-between bg-neutral-50/80 dark:bg-neutral-900/50">
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setSelectedEmail(null)}
-                  className="p-2 text-neutral-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
-                >
-                  <ArrowRight className="w-5 h-5" />
-                </button>
-                <h2 className="text-lg font-bold text-neutral-900 dark:text-white truncate max-w-lg">
-                  {selectedEmail.subject || "(بدون عنوان)"}
-                </h2>
-              </div>
-              <div className="flex items-center gap-2">
-                <button onClick={() => handleReply(selectedEmail)} className="p-2 text-neutral-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors" title={t({ ar: "رد", en: "Reply" })}>
-                  <Reply className="w-5 h-5" />
-                </button>
-                <button onClick={() => handleForward(selectedEmail)} className="p-2 text-neutral-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors" title={t({ ar: "تحويل", en: "Forward" })}>
-                  <Forward className="w-5 h-5" />
-                </button>
-              </div>
+          <div className="flex flex-col flex-1 overflow-y-auto bg-white dark:bg-neutral-950">
+            {/* Toolbar */}
+            <div className="px-6 py-4 border-b border-neutral-100 dark:border-neutral-800 flex items-center gap-6 bg-white dark:bg-neutral-950 sticky top-0 z-10">
+              <button
+                onClick={() => setSelectedEmail(null)}
+                className="flex items-center gap-2 text-neutral-500 hover:text-blue-600 transition-colors text-sm font-medium"
+              >
+                <ArrowRight className="w-5 h-5" />
+                {t({ ar: "رجوع", en: "Back" })}
+              </button>
+              <div className="h-5 w-px bg-neutral-200 dark:bg-neutral-800" />
+              <button onClick={() => handleReply(selectedEmail)} className="flex items-center gap-2 text-neutral-500 hover:text-blue-600 transition-colors text-sm font-medium">
+                <Reply className="w-4 h-4" />
+                {t({ ar: "رد", en: "Reply" })}
+              </button>
+              <button onClick={() => handleForward(selectedEmail)} className="flex items-center gap-2 text-neutral-500 hover:text-blue-600 transition-colors text-sm font-medium">
+                <Forward className="w-4 h-4" />
+                {t({ ar: "تحويل", en: "Forward" })}
+              </button>
+              <button onClick={(e) => handleToggleStar(e, selectedEmail)} className="flex items-center gap-2 text-neutral-500 hover:text-amber-500 transition-colors text-sm font-medium mr-auto">
+                <Star className={`w-5 h-5 ${selectedEmail.isStarred ? 'fill-amber-400 text-amber-400' : ''}`} />
+              </button>
+              <button className="flex items-center gap-2 text-neutral-500 hover:text-red-600 transition-colors text-sm font-medium">
+                <ShieldBan className="w-4 h-4" />
+                {t({ ar: "حظر المرسل", en: "Block Sender" })}
+              </button>
             </div>
-            <div className="p-6 md:p-10 flex-1 max-w-4xl mx-auto w-full">
-              <div className="flex items-start gap-4 mb-8">
-                <div className={`w-12 h-12 rounded-full ${getAvatarColor(selectedEmail.from)} flex items-center justify-center text-white font-bold text-lg shrink-0`}>
-                  {getInitials(selectedEmail.from)}
+            
+            <div className="p-8 md:p-12 flex-1 max-w-5xl mx-auto w-full">
+              <h1 className="text-3xl font-bold text-neutral-900 dark:text-white mb-10 leading-tight">
+                {selectedEmail.subject || "(بدون عنوان)"}
+              </h1>
+              
+              <div className="flex items-start justify-between mb-12">
+                <div className="flex items-center gap-4">
+                  <div className={`w-12 h-12 rounded-full ${getAvatarColor(selectedEmail.from)} flex items-center justify-center text-white font-bold text-xl shrink-0 shadow-sm`}>
+                    {getInitials(selectedEmail.from)}
+                  </div>
+                  <div>
+                    <p className="font-bold text-neutral-900 dark:text-white text-base">
+                      {selectedEmail.from}
+                    </p>
+                    <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+                      {t({ ar: "إلى", en: "To" })} : {selectedEmail.to}
+                    </p>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <p className="font-bold text-neutral-900 dark:text-white">{selectedEmail.from}</p>
-                  <p className="text-sm text-neutral-500 dark:text-neutral-400">{t({ ar: "إلى", en: "To" })}: {selectedEmail.to}</p>
-                  <p className="text-xs text-neutral-400 mt-1 flex items-center gap-1">
-                    <Clock className="w-3 h-3" />
-                    {new Date(selectedEmail.createdAt).toLocaleString("ar-SA")}
-                  </p>
+                <div className="text-sm text-neutral-500 dark:text-neutral-400 flex items-center gap-2 bg-neutral-50 dark:bg-neutral-900 px-3 py-1.5 rounded-lg border border-neutral-100 dark:border-neutral-800">
+                  <Clock className="w-4 h-4" />
+                  {new Date(selectedEmail.createdAt).toLocaleString("en-US", { month: "short", day: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}
                 </div>
               </div>
-              <div className="prose dark:prose-invert max-w-none text-neutral-800 dark:text-neutral-200 leading-relaxed whitespace-pre-wrap">
+
+              <div className="prose dark:prose-invert max-w-none text-neutral-800 dark:text-neutral-200 leading-loose whitespace-pre-wrap text-[15px]">
                 {selectedEmail.html ? (
                   <div dangerouslySetInnerHTML={{ __html: selectedEmail.html }} />
                 ) : (
@@ -617,8 +634,8 @@ export default function EmailPage() {
 
               {/* Attachments */}
               {selectedEmail.attachments && Array.isArray(selectedEmail.attachments) && selectedEmail.attachments.length > 0 && (
-                <div className="mt-8 pt-6 border-t border-neutral-100 dark:border-neutral-800">
-                  <h3 className="text-sm font-bold text-neutral-700 dark:text-neutral-300 mb-3 flex items-center gap-2">
+                <div className="mt-12 pt-8 border-t border-neutral-100 dark:border-neutral-800">
+                  <h3 className="text-sm font-bold text-neutral-700 dark:text-neutral-300 mb-4 flex items-center gap-2">
                     <Paperclip className="w-4 h-4" />
                     {t({ ar: "المرفقات", en: "Attachments" })} ({selectedEmail.attachments.length})
                   </h3>
@@ -631,9 +648,11 @@ export default function EmailPage() {
                           href={href}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center gap-3 p-3 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+                          className="flex items-center gap-3 p-3 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-900 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors group"
                         >
-                          {getFileIcon(att.filename)}
+                          <div className="p-2 bg-white dark:bg-neutral-950 rounded-lg shadow-sm group-hover:scale-110 transition-transform">
+                            {getFileIcon(att.filename)}
+                          </div>
                           <span className="text-sm font-medium text-neutral-700 dark:text-neutral-200">{att.filename}</span>
                         </a>
                       );
@@ -641,6 +660,25 @@ export default function EmailPage() {
                   </div>
                 </div>
               )}
+
+              {/* Bottom Actions (Translate & Reply/Forward) */}
+              <div className="mt-16 pt-8 border-t border-neutral-100 dark:border-neutral-800 pb-10">
+                <button className="flex items-center gap-2 text-violet-600 hover:text-violet-700 bg-violet-50 hover:bg-violet-100 dark:bg-violet-900/20 dark:hover:bg-violet-900/40 px-5 py-2.5 rounded-xl text-sm font-bold transition-colors mb-8 shadow-sm">
+                  <Wand2 className="w-5 h-5" />
+                  {t({ ar: "ترجمة الرسالة للعربية", en: "Translate to Arabic" })}
+                </button>
+                
+                <div className="flex items-center gap-4">
+                  <button onClick={() => handleReply(selectedEmail)} className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl text-sm font-bold transition-all shadow-md hover:shadow-lg w-32">
+                    <Reply className="w-5 h-5" />
+                    {t({ ar: "رد", en: "Reply" })}
+                  </button>
+                  <button onClick={() => handleForward(selectedEmail)} className="flex items-center justify-center gap-2 border-2 border-neutral-200 dark:border-neutral-700 hover:border-neutral-300 dark:hover:border-neutral-600 hover:bg-neutral-50 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-300 px-8 py-3 rounded-xl text-sm font-bold transition-all w-32">
+                    <Forward className="w-5 h-5" />
+                    {t({ ar: "تحويل", en: "Forward" })}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         ) : (
