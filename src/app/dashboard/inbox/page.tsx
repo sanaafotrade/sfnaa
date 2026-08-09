@@ -479,8 +479,10 @@ export default function EmailPage() {
                       headers: { "Content-Type": "application/json" },
                       body: JSON.stringify({ action: "blockSender", ids: [selectedEmail.id] })
                     });
-                    toast.success("تم حظر المرسل بنجاح");
+                    toast.success("تم حظر المرسل ونقله للبريد المزعج");
                     setShowBlockConfirm(false);
+                    setSelectedEmail(null);
+                    loadEmails(false);
                   } catch { 
                     toast.error("حدث خطأ في الحظر"); 
                   } finally {

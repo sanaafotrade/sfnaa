@@ -56,6 +56,12 @@ export async function POST(req: Request) {
             }
           });
         }
+        
+        // Move all existing emails from this sender to spam folder
+        await prisma.emailRecord.updateMany({
+          where: { from: { contains: plainEmail } },
+          data: { status: "spam" }
+        });
       }
     } else {
       return NextResponse.json({ error: "Invalid action" }, { status: 400 });
