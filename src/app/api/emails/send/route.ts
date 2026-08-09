@@ -18,6 +18,12 @@ export async function POST(req: Request) {
       path: att.url,
     })) || [];
 
+    // Fetch email settings for sender name and signature
+    const settings = await prisma.emailSettings.findUnique({ where: { id: "default" } });
+    const senderName = settings?.senderName || "سفانة نجد";
+    const signature = settings?.signatureEnabled && settings.signature ? settings.signature : "";
+    const fromString = `${senderName} <info@sfnaa.com>`;
+
     const htmlTemplate = `
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -61,29 +67,44 @@ export async function POST(req: Request) {
     .content-body {
       white-space: pre-wrap;
     }
+    .footer {
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid #e4e4e7;
+      color: #71717a;
+      font-size: 14px;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
-      <h1>سفانة نجد | Safana Najd</h1>
+      <h1>${senderName}</h1>
     </div>
     <div class="content">
       <div class="content-body">${text}</div>
+      ${signature ? `
+      <div class="footer">
+        ${signature.replace(/\n/g, '<br/>')}
+      </div>
+      ` : ''}
     </div>
   </div>
 </body>
 </html>
 `;
 
+    const fullText = signature ? `${text}\n\n--\n${signature}` : text;
+
     // Send the email via Resend if API key is configured
     let resendData = null;
     if (process.env.RESEND_API_KEY && process.env.RESEND_API_KEY !== "missing") {
       const { data, error } = await resend.emails.send({
-        from: "سفانة نجد <info@sfnaa.com>", // Using info@sfnaa.com
+        from: fromString,
         to: [to],
         subject: subject,
-        text: text,
+        text: fullText,
         html: htmlTemplate,
         attachments: resendAttachments.length > 0 ? resendAttachments : undefined,
       });
@@ -99,10 +120,10 @@ export async function POST(req: Request) {
     // Save to Prisma (Sent folder)
     const savedEmail = await prisma.emailRecord.create({
       data: {
-        from: "سفانة نجد <info@sfnaa.com>",
+        from: fromString,
         to: to,
         subject: subject,
-        text: text,
+        text: fullText,
         html: htmlTemplate, 
         status: "sent",
         isRead: true, // Sent emails are naturally read by sender

@@ -79,6 +79,12 @@ export default function EmailPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [showSettings, setShowSettings] = useState(false);
+  const [settings, setSettings] = useState<any>({
+    senderName: "سفانة نجد",
+    signatureEnabled: true,
+    signature: "هذه رسالة تلقائية من نظام سفانة نجد للتجارة.\nThis is an automated message from Safana Najd Trading.",
+  });
+  const [isSavingSettings, setIsSavingSettings] = useState(false);
 
   // Compose state
   const [showCompose, setShowCompose] = useState(false);
@@ -108,16 +114,33 @@ export default function EmailPage() {
   };
 
   useEffect(() => {
-    setSelectedEmail(null);
-    setSelectedIds(new Set());
-    loadEmails(true);
-
-    const interval = setInterval(() => {
-      loadEmails(false);
-    }, 10000);
+    loadEmails();
+    // Load Settings
+    fetch("/api/emails/settings").then(r => r.json()).then(data => {
+      if (data && !data.error) setSettings(data);
+    }).catch(console.error);
     
+    // Refresh every 10 seconds
+    const interval = setInterval(() => loadEmails(false), 10000);
     return () => clearInterval(interval);
   }, [activeFolder]);
+
+  const handleSaveSettings = async () => {
+    setIsSavingSettings(true);
+    try {
+      await fetch("/api/emails/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(settings)
+      });
+      toast.success("تم حفظ الإعدادات بنجاح");
+      setShowSettings(false);
+    } catch {
+      toast.error("حدث خطأ أثناء حفظ الإعدادات");
+    } finally {
+      setIsSavingSettings(false);
+    }
+  };
 
   // ============ Email Actions ============
   const handleOpenEmail = async (email: EmailRecord) => {
@@ -281,7 +304,7 @@ export default function EmailPage() {
       {/* Settings Modal */}
       {showSettings && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white dark:bg-neutral-900 rounded-2xl w-full max-w-md max-h-[80vh] flex flex-col overflow-hidden shadow-2xl border border-neutral-200 dark:border-neutral-800">
+          <div className="bg-white dark:bg-neutral-900 rounded-2xl w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden shadow-2xl border border-neutral-200 dark:border-neutral-800">
             <div className="px-6 py-4 border-b border-neutral-100 dark:border-neutral-800 flex items-center justify-between bg-neutral-50 dark:bg-neutral-900/50">
               <h2 className="text-lg font-bold text-neutral-900 dark:text-white flex items-center gap-2">
                 <Settings2 className="w-5 h-5 text-blue-600" /> 
@@ -291,17 +314,69 @@ export default function EmailPage() {
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="p-6 overflow-y-auto space-y-6">
-              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 border border-blue-100 dark:border-blue-900/50">
-                <p className="text-sm font-semibold text-blue-700 dark:text-blue-400 mb-1">قريباً (Coming Soon)</p>
-                <p className="text-xs text-blue-600/80 dark:text-blue-300">
-                  إعدادات التوقيع، الرد التلقائي، والبريد المحظور ستتوفر قريباً حسب نظام الصلاحيات الجديد.
-                </p>
+            
+            <div className="p-6 overflow-y-auto flex-1 space-y-6">
+              <div>
+                <label className="block text-sm font-bold text-neutral-700 dark:text-neutral-300 mb-2">
+                  {t({ ar: "اسم المُرسل", en: "Sender Name" })}
+                </label>
+                <input
+                  type="text"
+                  value={settings.senderName}
+                  onChange={(e) => setSettings({ ...settings, senderName: e.target.value })}
+                  placeholder="سفانة نجد"
+                  className="w-full border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none transition-colors"
+                />
               </div>
+
+              <div className="pt-4 border-t border-neutral-100 dark:border-neutral-800">
+                <label className="flex items-center gap-3 cursor-pointer group">
+                  <div className={`w-10 h-6 flex items-center bg-neutral-300 dark:bg-neutral-700 rounded-full p-1 transition-colors duration-300 ${settings.signatureEnabled ? 'bg-blue-600 dark:bg-blue-500' : ''}`}>
+                    <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300 ${settings.signatureEnabled ? 'translate-x-[-16px]' : ''}`}></div>
+                  </div>
+                  <input 
+                    type="checkbox"
+                    className="hidden"
+                    checked={settings.signatureEnabled}
+                    onChange={(e) => setSettings({ ...settings, signatureEnabled: e.target.checked })}
+                  />
+                  <div>
+                    <span className="block text-sm font-bold text-neutral-900 dark:text-white group-hover:text-blue-600 transition-colors">
+                      {t({ ar: "تفعيل التوقيع التلقائي", en: "Enable Auto Signature" })}
+                    </span>
+                    <span className="text-xs text-neutral-500 dark:text-neutral-400">
+                      {t({ ar: "يُضاف هذا النص تلقائياً نهاية كل رسالة ترسلها", en: "Appended at the bottom of all sent emails" })}
+                    </span>
+                  </div>
+                </label>
+              </div>
+
+              {settings.signatureEnabled && (
+                <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                  <label className="block text-sm font-bold text-neutral-700 dark:text-neutral-300 mb-2">
+                    {t({ ar: "نص التوقيع", en: "Signature Text" })}
+                  </label>
+                  <textarea
+                    rows={4}
+                    value={settings.signature}
+                    onChange={(e) => setSettings({ ...settings, signature: e.target.value })}
+                    className="w-full border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none transition-colors resize-none"
+                    placeholder="هذه رسالة تلقائية..."
+                  />
+                </div>
+              )}
             </div>
-            <div className="px-6 py-4 border-t border-neutral-100 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/50">
-              <button onClick={() => setShowSettings(false)} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition-all">
-                {t({ ar: "إغلاق", en: "Close" })}
+
+            <div className="px-6 py-4 border-t border-neutral-100 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/50 flex gap-3">
+              <button onClick={() => setShowSettings(false)} className="flex-1 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 font-bold py-2.5 rounded-xl transition-all">
+                {t({ ar: "إلغاء", en: "Cancel" })}
+              </button>
+              <button 
+                onClick={handleSaveSettings}
+                disabled={isSavingSettings}
+                className="flex-[2] bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-70"
+              >
+                {isSavingSettings ? <Loader2 className="w-5 h-5 animate-spin" /> : t({ ar: "حفظ الإعدادات", en: "Save Settings" })}
               </button>
             </div>
           </div>
