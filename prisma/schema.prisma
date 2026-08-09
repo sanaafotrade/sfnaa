@@ -85,3 +85,15 @@ model SiteSettings {
   statsCountries  String   @default("+10")
   updatedAt       DateTime @updatedAt
 }
+
+model User {
+  id          String   @id @default(cuid())
+  name        String
+  email       String   @unique
+  password    String   // Hashed password
+  role        String   @default("EMPLOYEE") // "OWNER", "MANAGER", "EMPLOYEE"
+  permissions String[] @default([]) // e.g. ["email", "settings", "services", "partners", "users"]
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

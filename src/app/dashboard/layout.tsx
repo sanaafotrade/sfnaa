@@ -13,6 +13,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const { theme, toggleTheme } = useTheme();
   const pathname = usePathname();
   const [unreadCount, setUnreadCount] = useState(0);
+  const [user, setUser] = useState<any>(null);
 
   const isRtl = lang === "ar";
   
@@ -21,6 +22,14 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
+    // Fetch User Profile
+    fetch("/api/profile")
+      .then(res => res.json())
+      .then(data => {
+        if (!data.error) setUser(data);
+      })
+      .catch(() => {});
+
     const checkUnread = async () => {
       try {
         const res = await fetch("/api/emails/unread-count");
@@ -69,42 +78,62 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           </Link>
           
           {/* Mail Section */}
-          <div className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mt-8 mb-2 px-2">
-            {t({ ar: "النظام", en: "System" })}
-          </div>
-          
-          <Link href="/dashboard/inbox" className={navLinkClass("/dashboard/inbox")}>
-            <Inbox className="w-5 h-5" />
-            <span className="flex-1">{t({ ar: "البريد الإلكتروني", en: "Email" })}</span>
-            {unreadCount > 0 && (
-              <span className="relative flex h-5 w-5 items-center justify-center mr-auto ml-2" dir="ltr">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-4 w-4 bg-red-500 text-[10px] font-bold text-white items-center justify-center">
-                  {unreadCount > 9 ? "+9" : unreadCount}
-                </span>
-              </span>
-            )}
-          </Link>
+          {(user?.role === 'OWNER' || user?.role === 'MANAGER' || user?.permissions.includes('email')) && (
+            <>
+              <div className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mt-8 mb-2 px-2">
+                {t({ ar: "النظام", en: "System" })}
+              </div>
+              <Link href="/dashboard/inbox" className={navLinkClass("/dashboard/inbox")}>
+                <Inbox className="w-5 h-5" />
+                <span className="flex-1">{t({ ar: "البريد الإلكتروني", en: "Email" })}</span>
+                {unreadCount > 0 && (
+                  <span className="relative flex h-5 w-5 items-center justify-center mr-auto ml-2" dir="ltr">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-4 w-4 bg-red-500 text-[10px] font-bold text-white items-center justify-center">
+                      {unreadCount > 9 ? "+9" : unreadCount}
+                    </span>
+                  </span>
+                )}
+              </Link>
+            </>
+          )}
           
           {/* Website Section */}
           <div className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mt-8 mb-2 px-2">
             {t({ ar: "الموقع الإلكتروني", en: "Website" })}
           </div>
-          <Link href="/dashboard/site-settings" className={navLinkClass("/dashboard/site-settings")}>
-            <Globe className="w-5 h-5" />
-            {t({ ar: "إعدادات الموقع", en: "Site Settings" })}
-          </Link>
-          <Link href="/dashboard/services" className={navLinkClass("/dashboard/services")}>
-            <Layout className="w-5 h-5" />
-            {t({ ar: "إدارة الخدمات", en: "Services" })}
-          </Link>
-          <Link href="/dashboard/partners" className={navLinkClass("/dashboard/partners")}>
-            <Users className="w-5 h-5" />
-            {t({ ar: "إدارة الشركاء", en: "Partners" })}
-          </Link>
+          {(user?.role === 'OWNER' || user?.role === 'MANAGER' || user?.permissions.includes('settings')) && (
+            <Link href="/dashboard/site-settings" className={navLinkClass("/dashboard/site-settings")}>
+              <Globe className="w-5 h-5" />
+              {t({ ar: "إعدادات الموقع", en: "Site Settings" })}
+            </Link>
+          )}
+          {(user?.role === 'OWNER' || user?.role === 'MANAGER' || user?.permissions.includes('services')) && (
+            <Link href="/dashboard/services" className={navLinkClass("/dashboard/services")}>
+              <Layout className="w-5 h-5" />
+              {t({ ar: "إدارة الخدمات", en: "Services" })}
+            </Link>
+          )}
+          {(user?.role === 'OWNER' || user?.role === 'MANAGER' || user?.permissions.includes('partners')) && (
+            <Link href="/dashboard/partners" className={navLinkClass("/dashboard/partners")}>
+              <Users className="w-5 h-5" />
+              {t({ ar: "إدارة الشركاء", en: "Partners" })}
+            </Link>
+          )}
           
+          {/* Admin Section */}
+          {(user?.role === 'OWNER' || user?.role === 'MANAGER') && (
+            <>
+              <div className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mt-8 mb-2 px-2">
+                {t({ ar: "الإدارة", en: "Administration" })}
+              </div>
+              <Link href="/dashboard/users" className={navLinkClass("/dashboard/users")}>
+                <ShieldCheck className="w-5 h-5" />
+                {t({ ar: "فريق العمل", en: "Team" })}
+              </Link>
+            </>
+          )}
 
-          
           <div className="mt-4 border-t border-neutral-100 dark:border-neutral-800/50 pt-4">
             <LogoutButton />
           </div>
@@ -129,17 +158,18 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             </button>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-500 flex items-center justify-center text-white font-bold">
-              SN
+          <Link href="/dashboard/profile" className="flex items-center gap-3 hover:bg-neutral-100 dark:hover:bg-neutral-800 p-2 rounded-xl transition-colors cursor-pointer group">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-500 flex items-center justify-center text-white font-bold group-hover:shadow-md transition-all">
+              {user?.name ? user.name.charAt(0) : "S"}
             </div>
-            <div>
-              <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-200">
-                {t({ ar: "سفانة نجد", en: "Safana Najd" })}
+            <div className="flex-1 overflow-hidden">
+              <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-200 truncate">
+                {user?.name || t({ ar: "جاري التحميل...", en: "Loading..." })}
               </p>
-              <p className="text-xs text-neutral-500">info@sfnaa.com</p>
+              <p className="text-xs text-neutral-500 truncate">{user?.email || "..."}</p>
             </div>
-          </div>
+            <Settings className="w-4 h-4 text-neutral-400 group-hover:text-blue-500 transition-colors" />
+          </Link>
         </div>
       </aside>
 

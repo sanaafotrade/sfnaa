@@ -1,20 +1,67 @@
 import { NextResponse } from 'next/server';
 import { SignJWT } from 'jose';
+import prisma from '@/lib/prisma';
+import { randomBytes, scryptSync, timingSafeEqual } from 'crypto';
+
+const hashPassword = (password: string) => {
+  const salt = randomBytes(16).toString('hex');
+  const hashedBuffer = scryptSync(password, salt, 64);
+  return `${salt}:${hashedBuffer.toString('hex')}`;
+};
+
+const verifyPassword = (password: string, hash: string) => {
+  const [salt, key] = hash.split(':');
+  const hashedBuffer = scryptSync(password, salt, 64);
+  const keyBuffer = Buffer.from(key, 'hex');
+  const match = timingSafeEqual(hashedBuffer, keyBuffer);
+  return match;
+};
 
 export async function POST(request: Request) {
   try {
-    const { password } = await request.json();
+    const { email, password } = await request.json();
     
-    // Verify password against process.env.ADMIN_PASSWORD
-    const adminPassword = process.env.ADMIN_PASSWORD || 'admin'; // fallback for dev if needed
-    
-    if (password !== adminPassword) {
-      return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
+    if (!email || !password) {
+      return NextResponse.json({ error: 'الرجاء إدخال البريد الإلكتروني وكلمة المرور' }, { status: 400 });
     }
 
-    const secret = new TextEncoder().encode(adminPassword);
+    // Default admin creation if no users exist
+    const usersCount = await prisma.user.count();
+    if (usersCount === 0) {
+      const hashedPassword = hashPassword('admin123');
+      await prisma.user.create({
+        data: {
+          email: 'Saadalfhaid@gmail.com',
+          password: hashedPassword,
+          name: 'سعد الفهيد',
+          role: 'OWNER',
+          permissions: ['email', 'settings', 'services', 'partners', 'users'],
+        }
+      });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { email: email.toLowerCase() }
+    });
+
+    if (!user || !user.isActive) {
+      return NextResponse.json({ error: 'البيانات غير صحيحة أو الحساب موقوف' }, { status: 401 });
+    }
+
+    const isValidPassword = verifyPassword(password, user.password);
+    if (!isValidPassword) {
+      return NextResponse.json({ error: 'البيانات غير صحيحة' }, { status: 401 });
+    }
+
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'safana_najd_secret_key_2026');
     
-    const token = await new SignJWT({ role: 'admin' })
+    const token = await new SignJWT({ 
+      userId: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      permissions: user.permissions
+    })
       .setProtectedHeader({ alg: 'HS256' })
       .setExpirationTime('24h')
       .sign(secret);
@@ -31,6 +78,7 @@ export async function POST(request: Request) {
 
     return response;
   } catch (error) {
+    console.error("Login error:", error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
