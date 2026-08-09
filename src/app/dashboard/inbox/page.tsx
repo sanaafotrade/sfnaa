@@ -161,8 +161,33 @@ export default function EmailPage() {
 
   const handleToggleStar = async (e: React.MouseEvent, email: EmailRecord) => {
     e.stopPropagation();
-    // TODO: Implement star toggle API
-    setEmails(prev => prev.map(em => em.id === email.id ? { ...em, isStarred: !em.isStarred } : em));
+    try {
+      await fetch("/api/emails/bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "toggleStar", ids: [email.id] })
+      });
+      setEmails(prev => prev.map(em => em.id === email.id ? { ...em, isStarred: !em.isStarred } : em));
+      if (selectedEmail?.id === email.id) {
+        setSelectedEmail(prev => prev ? { ...prev, isStarred: !prev.isStarred } : null);
+      }
+    } catch {
+      toast.error("حدث خطأ");
+    }
+  };
+
+  const handleBlockSender = async (email: EmailRecord) => {
+    if (!confirm("هل أنت متأكد من حظر هذا المرسل؟ لن تتلقى رسائل منه مجدداً.")) return;
+    try {
+      await fetch("/api/emails/bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "blockSender", ids: [email.id] })
+      });
+      toast.success("تم حظر المرسل بنجاح");
+    } catch {
+      toast.error("حدث خطأ في الحظر");
+    }
   };
 
   // ============ Selection ============
@@ -668,7 +693,7 @@ export default function EmailPage() {
               <button onClick={(e) => handleToggleStar(e, selectedEmail)} className="flex items-center gap-2 text-neutral-500 hover:text-amber-500 transition-colors text-sm font-medium mr-auto">
                 <Star className={`w-5 h-5 ${selectedEmail.isStarred ? 'fill-amber-400 text-amber-400' : ''}`} />
               </button>
-              <button className="flex items-center gap-2 text-neutral-500 hover:text-red-600 transition-colors text-sm font-medium">
+              <button onClick={() => handleBlockSender(selectedEmail)} className="flex items-center gap-2 text-neutral-500 hover:text-red-600 transition-colors text-sm font-medium">
                 <ShieldBan className="w-4 h-4" />
                 {t({ ar: "حظر المرسل", en: "Block Sender" })}
               </button>

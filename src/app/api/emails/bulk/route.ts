@@ -29,6 +29,34 @@ export async function POST(req: Request) {
         where: { id: { in: ids } },
         data: { isRead: false },
       });
+    } else if (action === "toggleStar") {
+      // We need to fetch the current state first
+      const email = await prisma.emailRecord.findUnique({ where: { id: ids[0] } });
+      if (email) {
+        await prisma.emailRecord.update({
+          where: { id: ids[0] },
+          data: { isStarred: !email.isStarred },
+        });
+      }
+    } else if (action === "blockSender") {
+      const email = await prisma.emailRecord.findUnique({ where: { id: ids[0] } });
+      if (email) {
+        // Extract plain email from "Name <email@domain.com>"
+        const emailMatch = email.from.match(/<([^>]+)>/);
+        const plainEmail = emailMatch ? emailMatch[1] : email.from;
+        
+        const settings = await prisma.emailSettings.findUnique({ where: { id: "default" } });
+        if (settings && !settings.blockedEmails.includes(plainEmail)) {
+          await prisma.emailSettings.update({
+            where: { id: "default" },
+            data: {
+              blockedEmails: {
+                push: plainEmail
+              }
+            }
+          });
+        }
+      }
     } else {
       return NextResponse.json({ error: "Invalid action" }, { status: 400 });
     }
