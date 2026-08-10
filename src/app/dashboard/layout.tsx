@@ -3,7 +3,7 @@
 import { ReactNode, useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Inbox, Send, Settings, ShieldCheck, MailPlus, Globe, Layout, Users, LayoutDashboard, Moon, Sun, Languages, Plus } from "lucide-react";
+import { Inbox, Send, Settings, ShieldCheck, MailPlus, Globe, Layout, Users, LayoutDashboard, Moon, Sun, Languages, Plus, FileText } from "lucide-react";
 import LogoutButton from "./LogoutButton";
 import { useLanguage } from "@/lib/i18n";
 import { useTheme } from "@/lib/theme";
@@ -106,6 +106,12 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             <Link href="/dashboard/site-settings" className={navLinkClass("/dashboard/site-settings")}>
               <Globe className="w-5 h-5" />
               {t({ ar: "إعدادات الموقع", en: "Site Settings" })}
+            </Link>
+          )}
+          {(user?.role === 'OWNER' || user?.role === 'MANAGER' || user?.permissions.includes('letters')) && (
+            <Link href="/dashboard/hr-letters" className={navLinkClass("/dashboard/hr-letters")}>
+              <FileText className="w-5 h-5" />
+              {t({ ar: "إدارة الخطابات", en: "Letters" })}
             </Link>
           )}
           {(user?.role === 'OWNER' || user?.role === 'MANAGER' || user?.permissions.includes('services')) && (
