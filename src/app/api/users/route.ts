@@ -81,25 +81,42 @@ export async function POST(request: Request) {
 
     // Send Welcome Email
     try {
+      const htmlContent = `
+          <div dir="rtl" style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+            <h2 style="color: #2563eb;">مرحباً ${name}،</h2>
+            <p>لقد تم إنشاء حساب لك في نظام <strong>سفانة نجد للتجارة</strong>.</p>
+            <p><strong>معلومات الدخول الخاصة بك:</strong></p>
+            <ul style="background: #f8fafc; padding: 15px 35px; border-radius: 8px;">
+              <li>البريد الإلكتروني: <strong>${email.toLowerCase()}</strong></li>
+              <li>كلمة المرور المؤقتة: <strong style="color: #eab308; background: #fefce8; padding: 2px 6px; border-radius: 4px;">${temporaryPassword}</strong></li>
+            </ul>
+            <p style="color: #ef4444; font-weight: bold; font-size: 14px;">ملاحظة: يرجى تغيير كلمة المرور فور دخولك للنظام لأول مرة.</p>
+            <p style="margin: 20px 0;">
+              <a href="https://sfnaa.com/login" style="background-color: #2563eb; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">
+                تسجيل الدخول للنظام
+              </a>
+            </p>
+          </div>
+        `;
+
       await resend.emails.send({
         from: 'Safana Najd <info@sfnaa.com>',
         to: email,
-        subject: 'مرحباً بك في فريق عمل سفانة نجد',
-        html: `
-          <div dir="rtl" style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-            <h2 style="color: #2563eb;">مرحباً ${name}،</h2>
-            <p>تم إنشاء حساب لك في نظام سفانة نجد بنجاح.</p>
-            <p><strong>بيانات الدخول الخاصة بك:</strong></p>
-            <ul>
-              <li><strong>الرابط:</strong> <a href="https://sfnaa.com/login">sfnaa.com/login</a></li>
-              <li><strong>البريد الإلكتروني:</strong> ${email}</li>
-              <li><strong>كلمة المرور المؤقتة:</strong> <code>${temporaryPassword}</code></li>
-            </ul>
-            <p style="color: #ef4444;">ملاحظة: نرجو منك تغيير كلمة المرور بمجرد تسجيل الدخول من خلال صفحة الملف الشخصي.</p>
-            <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
-            <p style="font-size: 12px; color: #666;">رسالة آلية من نظام سفانة نجد.</p>
-          </div>
-        `
+        subject: 'مرحباً بك في منصة سفانة نجد للتجارة',
+        html: htmlContent
+      });
+
+      // Save to DB so it appears in Inbox/Sent
+      await prisma.emailRecord.create({
+        data: {
+          from: 'info@sfnaa.com',
+          to: email,
+          subject: 'مرحباً بك في منصة سفانة نجد للتجارة',
+          html: htmlContent,
+          text: 'لقد تم إنشاء حساب لك في نظام سفانة نجد للتجارة...',
+          status: 'sent',
+          isRead: true
+        }
       });
     } catch (emailError) {
       console.error('Failed to send email:', emailError);

@@ -39,11 +39,7 @@ export async function POST(request: Request) {
     const resetUrl = `https://sfnaa.com/reset-password?token=${resetToken}`;
 
     try {
-      await resend.emails.send({
-        from: 'Safana Najd <info@sfnaa.com>',
-        to: user.email,
-        subject: 'استعادة كلمة المرور - سفانة نجد',
-        html: `
+      const htmlContent = `
           <div dir="rtl" style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
             <h2 style="color: #2563eb;">مرحباً ${user.name}،</h2>
             <p>لقد تلقينا طلباً لإعادة تعيين كلمة المرور الخاصة بحسابك في سفانة نجد.</p>
@@ -58,7 +54,25 @@ export async function POST(request: Request) {
             <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
             <p style="font-size: 12px; color: #666;">رسالة آلية من نظام سفانة نجد.</p>
           </div>
-        `
+        `;
+
+      await resend.emails.send({
+        from: 'Safana Najd <info@sfnaa.com>',
+        to: user.email,
+        subject: 'استعادة كلمة المرور - سفانة نجد',
+        html: htmlContent
+      });
+
+      await prisma.emailRecord.create({
+        data: {
+          from: 'info@sfnaa.com',
+          to: user.email,
+          subject: 'استعادة كلمة المرور - سفانة نجد',
+          html: htmlContent,
+          text: 'طلب إعادة تعيين كلمة المرور...',
+          status: 'sent',
+          isRead: true
+        }
       });
     } catch (emailError) {
       console.error('Failed to send reset email:', emailError);
