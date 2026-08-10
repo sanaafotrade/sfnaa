@@ -85,6 +85,8 @@ export default function EmailPage() {
     signature: "هذه رسالة تلقائية من نظام سفانة نجد للتجارة.\nThis is an automated message from Safana Najd Trading.",
   });
   const [isSavingSettings, setIsSavingSettings] = useState(false);
+  const [isTranslating, setIsTranslating] = useState(false);
+  const [translatedBodies, setTranslatedBodies] = useState<Record<string, string>>({});
 
   // Compose state
   const [showCompose, setShowCompose] = useState(false);
@@ -174,6 +176,30 @@ export default function EmailPage() {
       }
     } catch {
       toast.error("حدث خطأ");
+    }
+  };
+
+  const handleTranslate = async (email: EmailRecord) => {
+    if (translatedBodies[email.id]) return;
+    setIsTranslating(true);
+    try {
+      const textToTranslate = email.html || email.text || "";
+      const res = await fetch("/api/emails/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: textToTranslate, targetLang: "ar" })
+      });
+      const data = await res.json();
+      if (res.ok && data.translatedText) {
+        setTranslatedBodies(prev => ({ ...prev, [email.id]: data.translatedText }));
+        toast.success(t({ ar: "تمت الترجمة بنجاح", en: "Translated successfully" }));
+      } else {
+        throw new Error(data.error);
+      }
+    } catch (err) {
+      toast.error(t({ ar: "حدث خطأ أثناء الترجمة", en: "Failed to translate" }));
+    } finally {
+      setIsTranslating(false);
     }
   };
 
@@ -765,8 +791,10 @@ export default function EmailPage() {
                 </div>
               </div>
 
-              <div className="prose dark:prose-invert max-w-none text-neutral-800 dark:text-neutral-200 leading-loose whitespace-pre-wrap text-[15px]">
-                {selectedEmail.html ? (
+              <div className="prose dark:prose-invert max-w-none text-neutral-800 dark:text-neutral-200 leading-loose whitespace-pre-wrap text-[15px]" dir={translatedBodies[selectedEmail.id] ? "rtl" : "ltr"}>
+                {translatedBodies[selectedEmail.id] ? (
+                  <div dangerouslySetInnerHTML={{ __html: translatedBodies[selectedEmail.id] }} />
+                ) : selectedEmail.html ? (
                   <div dangerouslySetInnerHTML={{ __html: selectedEmail.html }} />
                 ) : (
                   <p>{selectedEmail.text}</p>
@@ -804,8 +832,12 @@ export default function EmailPage() {
 
               {/* Bottom Actions (Translate & Reply/Forward) */}
               <div className="mt-16 pt-8 border-t border-neutral-100 dark:border-neutral-800 pb-10">
-                <button className="flex items-center gap-2 text-violet-600 hover:text-violet-700 bg-violet-50 hover:bg-violet-100 dark:bg-violet-900/20 dark:hover:bg-violet-900/40 px-5 py-2.5 rounded-xl text-sm font-bold transition-colors mb-8 shadow-sm">
-                  <Wand2 className="w-5 h-5" />
+                <button 
+                  onClick={() => handleTranslate(selectedEmail)}
+                  disabled={isTranslating}
+                  className="flex items-center gap-2 text-violet-600 hover:text-violet-700 bg-violet-50 hover:bg-violet-100 dark:bg-violet-900/20 dark:hover:bg-violet-900/40 px-5 py-2.5 rounded-xl text-sm font-bold transition-colors mb-8 shadow-sm disabled:opacity-70"
+                >
+                  {isTranslating ? <Loader2 className="w-5 h-5 animate-spin" /> : <Wand2 className="w-5 h-5" />}
                   {t({ ar: "ترجمة الرسالة للعربية", en: "Translate to Arabic" })}
                 </button>
                 
