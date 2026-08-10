@@ -16,7 +16,7 @@ async function getAuthRole() {
   }
 }
 
-export async function PUT(request: Request, context: { params: { id: string } }) {
+export async function PUT(request: Request, context: { params: Promise<{ id: string }> }) {
   const role = await getAuthRole();
   if (role !== 'OWNER' && role !== 'MANAGER') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -55,7 +55,7 @@ export async function PUT(request: Request, context: { params: { id: string } })
   }
 }
 
-export async function DELETE(request: Request, context: { params: { id: string } }) {
+export async function DELETE(request: Request, context: { params: Promise<{ id: string }> }) {
   const role = await getAuthRole();
   if (role !== 'OWNER' && role !== 'MANAGER') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
