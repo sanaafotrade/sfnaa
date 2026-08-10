@@ -87,6 +87,7 @@ export default function EmailPage() {
   const [isSavingSettings, setIsSavingSettings] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
   const [translatedBodies, setTranslatedBodies] = useState<Record<string, string>>({});
+  const [showTranslations, setShowTranslations] = useState<Record<string, boolean>>({});
 
   // Compose state
   const [showCompose, setShowCompose] = useState(false);
@@ -180,7 +181,10 @@ export default function EmailPage() {
   };
 
   const handleTranslate = async (email: EmailRecord) => {
-    if (translatedBodies[email.id]) return;
+    if (translatedBodies[email.id]) {
+      setShowTranslations(prev => ({ ...prev, [email.id]: true }));
+      return;
+    }
     setIsTranslating(true);
     try {
       const textToTranslate = email.html || email.text || "";
@@ -192,6 +196,7 @@ export default function EmailPage() {
       const data = await res.json();
       if (res.ok && data.translatedText) {
         setTranslatedBodies(prev => ({ ...prev, [email.id]: data.translatedText }));
+        setShowTranslations(prev => ({ ...prev, [email.id]: true }));
         toast.success(t({ ar: "تمت الترجمة بنجاح", en: "Translated successfully" }));
       } else {
         throw new Error(data.error);
@@ -201,6 +206,10 @@ export default function EmailPage() {
     } finally {
       setIsTranslating(false);
     }
+  };
+
+  const handleHideTranslation = (email: EmailRecord) => {
+    setShowTranslations(prev => ({ ...prev, [email.id]: false }));
   };
 
   const handleBlockSender = (email: EmailRecord) => {
@@ -791,10 +800,30 @@ export default function EmailPage() {
                 </div>
               </div>
 
-              <div className="prose dark:prose-invert max-w-none text-neutral-800 dark:text-neutral-200 leading-loose whitespace-pre-wrap text-[15px]" dir={translatedBodies[selectedEmail.id] ? "rtl" : "ltr"}>
-                {translatedBodies[selectedEmail.id] ? (
-                  <div dangerouslySetInnerHTML={{ __html: translatedBodies[selectedEmail.id] }} />
-                ) : selectedEmail.html ? (
+              {/* Translation Block */}
+              {showTranslations[selectedEmail.id] && translatedBodies[selectedEmail.id] && (
+                <div className="mb-10 bg-violet-50 dark:bg-violet-900/10 border border-violet-100 dark:border-violet-800/50 rounded-2xl p-6 relative">
+                  <div className="absolute top-4 right-6 flex items-center justify-between left-6 border-b border-violet-200/50 dark:border-violet-800/50 pb-3 mb-4">
+                    <h3 className="text-violet-800 dark:text-violet-300 font-bold flex items-center gap-2">
+                      <Wand2 className="w-4 h-4" />
+                      {t({ ar: "الترجمة العربية:", en: "Arabic Translation:" })}
+                    </h3>
+                    <button 
+                      onClick={() => handleHideTranslation(selectedEmail)}
+                      className="text-violet-600 hover:text-violet-800 dark:text-violet-400 dark:hover:text-violet-200 text-sm font-medium flex items-center gap-1 transition-colors"
+                    >
+                      {t({ ar: "إخفاء الترجمة", en: "Hide translation" })}
+                    </button>
+                  </div>
+                  <div className="prose dark:prose-invert max-w-none text-neutral-800 dark:text-neutral-200 leading-loose whitespace-pre-wrap text-[15px] pt-12" dir="rtl">
+                    <div dangerouslySetInnerHTML={{ __html: translatedBodies[selectedEmail.id] }} />
+                  </div>
+                </div>
+              )}
+
+              {/* Original Content */}
+              <div className="prose dark:prose-invert max-w-none text-neutral-800 dark:text-neutral-200 leading-loose whitespace-pre-wrap text-[15px]">
+                {selectedEmail.html ? (
                   <div dangerouslySetInnerHTML={{ __html: selectedEmail.html }} />
                 ) : (
                   <p>{selectedEmail.text}</p>
@@ -832,14 +861,16 @@ export default function EmailPage() {
 
               {/* Bottom Actions (Translate & Reply/Forward) */}
               <div className="mt-16 pt-8 border-t border-neutral-100 dark:border-neutral-800 pb-10">
-                <button 
-                  onClick={() => handleTranslate(selectedEmail)}
-                  disabled={isTranslating}
-                  className="flex items-center gap-2 text-violet-600 hover:text-violet-700 bg-violet-50 hover:bg-violet-100 dark:bg-violet-900/20 dark:hover:bg-violet-900/40 px-5 py-2.5 rounded-xl text-sm font-bold transition-colors mb-8 shadow-sm disabled:opacity-70"
-                >
-                  {isTranslating ? <Loader2 className="w-5 h-5 animate-spin" /> : <Wand2 className="w-5 h-5" />}
-                  {t({ ar: "ترجمة الرسالة للعربية", en: "Translate to Arabic" })}
-                </button>
+                {!showTranslations[selectedEmail.id] && (
+                  <button 
+                    onClick={() => handleTranslate(selectedEmail)}
+                    disabled={isTranslating}
+                    className="flex items-center gap-2 text-violet-600 hover:text-violet-700 bg-violet-50 hover:bg-violet-100 dark:bg-violet-900/20 dark:hover:bg-violet-900/40 px-5 py-2.5 rounded-xl text-sm font-bold transition-colors mb-8 shadow-sm disabled:opacity-70"
+                  >
+                    {isTranslating ? <Loader2 className="w-5 h-5 animate-spin" /> : <Wand2 className="w-5 h-5" />}
+                    {t({ ar: "ترجمة الرسالة للعربية", en: "Translate to Arabic" })}
+                  </button>
+                )}
                 
                 <div className="flex items-center gap-4">
                   <button onClick={() => handleReply(selectedEmail)} className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl text-sm font-bold transition-all shadow-md hover:shadow-lg w-32">
