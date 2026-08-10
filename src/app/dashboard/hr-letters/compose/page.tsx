@@ -90,8 +90,17 @@ interface ComposeOverlay {
   naturalAspect: number;
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════ */
+import { Suspense } from 'react';
+
 export default function ComposeLetterPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center h-[60vh]"><Loader2 className="w-8 h-8 animate-spin text-red-500" /></div>}>
+      <ComposeLetterContent />
+    </Suspense>
+  );
+}
+
+function ComposeLetterContent() {
   const { lang: language } = useLanguage();
   const isEn = language === 'en';
   const router = useRouter();
