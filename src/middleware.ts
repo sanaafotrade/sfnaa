@@ -3,13 +3,14 @@ import type { NextRequest } from 'next/server';
 import { jwtVerify } from 'jose';
 
 export async function middleware(request: NextRequest) {
-  const token = request.cookies.get('admin_session')?.value;
-  const isDashboardPath = request.nextUrl.pathname.startsWith('/dashboard');
+  try {
+    const token = request.cookies.get('admin_session')?.value;
+    const isDashboardPath = request.nextUrl.pathname.startsWith('/dashboard');
 
-  if (isDashboardPath) {
-    if (!token) {
-      return NextResponse.redirect(new URL('/login', request.url));
-    }
+    if (isDashboardPath) {
+      if (!token) {
+        return NextResponse.redirect(new URL('/login', request.url));
+      }
 
     try {
       const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'safana_najd_secret_key_2026');
@@ -40,11 +41,15 @@ export async function middleware(request: NextRequest) {
 
       return NextResponse.next();
     } catch (error) {
+      console.error('Middleware JWT Error:', error);
       // Invalid token
       const response = NextResponse.redirect(new URL('/login', request.url));
       response.cookies.delete('admin_session');
       return response;
     }
+  } catch (err) {
+    console.error('Middleware Global Error:', err);
+    return NextResponse.redirect(new URL('/login', request.url));
   }
 
   return NextResponse.next();
