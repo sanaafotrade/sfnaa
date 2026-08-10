@@ -32,8 +32,7 @@ export default function LoginPage() {
         throw new Error(data.error || t({ ar: 'بيانات الدخول غير صحيحة', en: 'Invalid credentials' }));
       }
 
-      router.push('/dashboard');
-      router.refresh();
+      window.location.href = '/dashboard';
     } catch (err: any) {
       setError(err.message || t({ ar: 'بيانات الدخول غير صحيحة', en: 'Invalid credentials' }));
       setIsLoading(false);
