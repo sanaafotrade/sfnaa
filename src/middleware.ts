@@ -47,6 +47,7 @@ export async function middleware(request: NextRequest) {
       response.cookies.delete('admin_session');
       return response;
     }
+  } // close if (isDashboardPath)
   } catch (err) {
     console.error('Middleware Global Error:', err);
     return NextResponse.redirect(new URL('/login', request.url));
