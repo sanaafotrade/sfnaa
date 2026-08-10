@@ -388,7 +388,7 @@ function ComposeLetterContent() {
       }
 
       await saveLetterDocument({ ...letter, letterNumber: finalNumber, overlays, status: finalStatus || letter.status || 'draft', updatedBy: userName, updatedAt: new Date().toISOString() });
-      if (finalStatus === 'sent') { updateLetter({ status: 'sent', letterNumber: finalNumber }); toast.success(isEn ? 'Finalized' : 'تم الإقفال'); setTimeout(() => router.push('/dashboard/hr/letters'), 1000); }
+      if (finalStatus === 'sent') { updateLetter({ status: 'sent', letterNumber: finalNumber }); toast.success(isEn ? 'Finalized' : 'تم الإقفال'); setTimeout(() => router.push('/dashboard/hr-letters'), 1000); }
       else toast.success(isEn ? 'Draft saved' : 'تم الحفظ');
     } catch (e: any) { console.error('Save error:', e); toast.error(isEn ? `Error: ${e?.message || 'Unknown'}` : `خطأ: ${e?.message || 'غير معروف'}`); } setSaving(false);
   };

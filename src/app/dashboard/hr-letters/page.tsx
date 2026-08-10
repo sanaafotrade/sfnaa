@@ -366,14 +366,14 @@ export default function LettersPage() {
                 {isEn ? "Stamp & Signature" : "الختم والتوقيع"}
               </button>
               <a
-                href="/dashboard/hr/letters/compose?lang=ar"
+                href="/dashboard/hr-letters/compose?lang=ar"
                 className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-all shadow-sm"
               >
                 <FileText className="w-4 h-4" />
                 {isEn ? "Compose (AR)" : "إنشاء خطاب عربي"}
               </a>
               <a
-                href="/dashboard/hr/letters/compose?lang=en"
+                href="/dashboard/hr-letters/compose?lang=en"
                 className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-sm"
               >
                 <FileText className="w-4 h-4" />
@@ -567,7 +567,7 @@ export default function LettersPage() {
                   <div className="flex items-center gap-2 pt-1 border-t border-slate-100">
                     {letter.isComposed ? (
                       <button
-                        onClick={() => router.push(`/dashboard/hr/letters/compose?id=${letter.id}`)}
+                        onClick={() => router.push(`/dashboard/hr-letters/compose?id=${letter.id}`)}
                         className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 bg-red-50 text-red-700 text-xs font-bold rounded-xl hover:bg-red-100 transition-all border border-red-100"
                       >
                         {letter.status === 'sent' ? <Eye className="w-4 h-4" /> : <Edit className="w-4 h-4" />}
