@@ -65,9 +65,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'الاسم والبريد الإلكتروني مطلوبان' }, { status: 400 });
     }
 
-    // Generate a random temporary password
-    const temporaryPassword = Math.random().toString(36).slice(-8);
-    const hashedPassword = hashPassword(temporaryPassword);
+    // Generate a random impossible password and a setup token
+    const impossiblePassword = randomBytes(32).toString('hex');
+    const hashedPassword = hashPassword(impossiblePassword);
+    
+    const resetToken = randomBytes(32).toString('hex');
+    const resetTokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
 
     const newUser = await prisma.user.create({
       data: {
@@ -76,26 +79,28 @@ export async function POST(request: Request) {
         password: hashedPassword,
         role: newUserRole || 'EMPLOYEE',
         permissions: permissions || [],
+        resetToken,
+        resetTokenExpiry,
       }
     });
 
     // Send Welcome Email
     try {
+      const setupUrl = `https://sfnaa.com/reset-password?token=${resetToken}`;
       const htmlContent = `
           <div dir="rtl" style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
             <h2 style="color: #2563eb;">مرحباً ${name}،</h2>
             <p>لقد تم إنشاء حساب لك في نظام <strong>سفانة نجد للتجارة</strong>.</p>
-            <p><strong>معلومات الدخول الخاصة بك:</strong></p>
-            <ul style="background: #f8fafc; padding: 15px 35px; border-radius: 8px;">
-              <li>البريد الإلكتروني: <strong>${email.toLowerCase()}</strong></li>
-              <li>كلمة المرور المؤقتة: <strong style="color: #eab308; background: #fefce8; padding: 2px 6px; border-radius: 4px;">${temporaryPassword}</strong></li>
-            </ul>
-            <p style="color: #ef4444; font-weight: bold; font-size: 14px;">ملاحظة: يرجى تغيير كلمة المرور فور دخولك للنظام لأول مرة.</p>
+            <p><strong>يرجى النقر على الرابط أدناه لإعداد كلمة المرور الخاصة بك وتفعيل الحساب:</strong></p>
             <p style="margin: 20px 0;">
-              <a href="https://sfnaa.com/login" style="background-color: #2563eb; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">
-                تسجيل الدخول للنظام
+              <a href="${setupUrl}" style="background-color: #2563eb; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">
+                إعداد كلمة المرور والدخول للنظام
               </a>
             </p>
+            <ul style="background: #f8fafc; padding: 15px 35px; border-radius: 8px; margin-top: 20px;">
+              <li>البريد الإلكتروني: <strong>${email.toLowerCase()}</strong></li>
+            </ul>
+            <p style="color: #ef4444; font-size: 14px;">ملاحظة: هذا الرابط صالح لمدة 7 أيام فقط.</p>
           </div>
         `;
 
