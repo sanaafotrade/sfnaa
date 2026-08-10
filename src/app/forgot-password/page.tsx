@@ -5,7 +5,7 @@ import { ShieldCheck, Loader2, ArrowRight, ArrowLeft, CheckCircle2, Globe } from
 import { useLanguage } from '@/lib/i18n';
 
 export default function ForgotPasswordPage() {
-  const { lang, t, setLanguage } = useLanguage();
+  const { lang, t, setLang } = useLanguage();
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -47,7 +47,7 @@ export default function ForgotPasswordPage() {
       {/* Language Switcher */}
       <div className="absolute top-6 left-6 md:top-8 md:left-8">
         <button
-          onClick={() => setLanguage(lang === 'ar' ? 'en' : 'ar')}
+          onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')}
           className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-full text-sm font-bold text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors shadow-sm"
         >
           <Globe className="w-4 h-4" />

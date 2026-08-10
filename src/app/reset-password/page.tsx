@@ -6,7 +6,7 @@ import { ShieldCheck, Loader2, Eye, EyeOff, Lock, Globe } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n';
 
 function ResetPasswordForm() {
-  const { lang, t, setLanguage } = useLanguage();
+  const { lang, t, setLang } = useLanguage();
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -66,7 +66,7 @@ function ResetPasswordForm() {
       {/* Language Switcher */}
       <div className="absolute top-4 left-4 md:top-6 md:left-6">
         <button
-          onClick={() => setLanguage(lang === 'ar' ? 'en' : 'ar')}
+          onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')}
           className="flex items-center gap-2 px-3 py-1.5 bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-full text-xs font-bold text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors shadow-sm"
         >
           <Globe className="w-3.5 h-3.5" />
