@@ -33,7 +33,7 @@ function getFirstDayOfWeek(year: number, month: number): number {
 export default function CustomDatePicker({
   value, onChange, placeholder, label, required, disabled, minDate, maxDate,
 }: CustomDatePickerProps) {
-  const { language } = useLanguage();
+  const { lang: language } = useLanguage();
   const isEn = language === 'en';
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);

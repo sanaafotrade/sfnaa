@@ -100,3 +100,94 @@ model User {
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 }
+
+model Letter {
+  id                String   @id @default(cuid())
+  title             String
+  letterNumber      String?
+  type              String   // "outgoing" | "incoming" | "internal"
+  fileUrl           String
+  fileType          String   // "pdf" | "image"
+  stampApplied      Boolean  @default(false)
+  signatureApplied  Boolean  @default(false)
+  finalFileUrl      String?
+  relatedEmployeeId String?
+  notes             String?
+  createdBy         String
+  createdByName     String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  updatedBy         String?
+  updatedByName     String?
+}
+
+model OrgStamp {
+  id           String   @id @default(cuid())
+  name         String
+  imageDataUrl String
+  isDefault    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+}
+
+model SavedSignature {
+  id               String   @id @default(cuid())
+  name             String
+  signatureDataUrl String
+  isDefault        Boolean  @default(false)
+  createdAt        DateTime @default(now())
+}
+
+model LetterDocument {
+  id              String   @id @default(cuid())
+  language        String   @default("ar")
+  letterNumber    String?
+  dateGregorian   String?
+  dateHijri       String?
+  showRecipient   Boolean  @default(true)
+  recipientText   String?
+  showSubject     Boolean  @default(true)
+  subjectText     String?
+  showGreeting    Boolean  @default(true)
+  blocks          Json?
+  showClosing     Boolean  @default(true)
+  closingText     String?
+  signerName      String?
+  signerTitle     String?
+  signerX         Float?
+  signerY         Float?
+  signatureUrl    String?
+  signatureX      Float?
+  signatureY      Float?
+  signatureWidth  Float?
+  signatureHeight Float?
+  signaturePage   Int?
+  stampUrl        String?
+  stampX          Float?
+  stampY          Float?
+  stampWidth      Float?
+  stampHeight     Float?
+  stampPage       Int?
+  overlays        Json?
+  status          String   @default("draft")
+  createdBy       String?
+  updatedBy       String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model LetterTemplateSettings {
+  id                  String   @id @default("default")
+  companyNameAr       String?
+  companyNameEn       String?
+  companyLogoUrl      String?
+  crNumber            String?
+  vatNumber           String?
+  phone               String?
+  email               String?
+  website             String?
+  footerAddressAr     String?
+  footerAddressEn     String?
+  defaultSignatureUrl String?
+  defaultStampUrl     String?
+  updatedAt           DateTime @updatedAt
+}
