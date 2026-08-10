@@ -88,20 +88,116 @@ export async function POST(request: Request) {
     try {
       const setupUrl = `https://sfnaa.com/reset-password?token=${resetToken}`;
       const htmlContent = `
-          <div dir="rtl" style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-            <h2 style="color: #2563eb;">مرحباً ${name}،</h2>
-            <p>لقد تم إنشاء حساب لك في نظام <strong>سفانة نجد للتجارة</strong>.</p>
-            <p><strong>يرجى النقر على الرابط أدناه لإعداد كلمة المرور الخاصة بك وتفعيل الحساب:</strong></p>
-            <p style="margin: 20px 0;">
-              <a href="${setupUrl}" style="background-color: #2563eb; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">
-                إعداد كلمة المرور والدخول للنظام
-              </a>
-            </p>
-            <ul style="background: #f8fafc; padding: 15px 35px; border-radius: 8px; margin-top: 20px;">
-              <li>البريد الإلكتروني: <strong>${email.toLowerCase()}</strong></li>
-            </ul>
-            <p style="color: #ef4444; font-size: 14px;">ملاحظة: هذا الرابط صالح لمدة 7 أيام فقط.</p>
-          </div>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f4f4f5;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: 40px auto;
+      background: #ffffff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      border: 1px solid #e4e4e7;
+    }
+    .header {
+      background-color: #09090b;
+      padding: 24px;
+      text-align: center;
+      border-bottom: 3px solid #3b82f6;
+    }
+    .header h1 {
+      color: #ffffff;
+      margin: 0;
+      font-size: 24px;
+      font-weight: 600;
+      letter-spacing: -0.5px;
+    }
+    .content {
+      padding: 32px 24px;
+      color: #3f3f46;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+    .btn {
+      background-color: #2563eb;
+      color: #ffffff !important;
+      padding: 12px 24px;
+      text-decoration: none;
+      border-radius: 8px;
+      display: inline-block;
+      font-weight: bold;
+      margin: 20px 0;
+    }
+    .info-box {
+      background: #f8fafc;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 20px;
+      border: 1px solid #e2e8f0;
+    }
+    .divider {
+      border: none;
+      border-top: 1px solid #e4e4e7;
+      margin: 32px 0;
+    }
+    .en-section {
+      direction: ltr;
+      text-align: left;
+    }
+    .ar-section {
+      direction: rtl;
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>سفانة نجد | Safana Najd</h1>
+    </div>
+    <div class="content">
+      <!-- Arabic Section -->
+      <div class="ar-section">
+        <h2 style="color: #2563eb; margin-top: 0;">مرحباً ${name}،</h2>
+        <p>لقد تم إنشاء حساب لك في نظام <strong>سفانة نجد للتجارة</strong>.</p>
+        <p><strong>يرجى النقر على الرابط أدناه لإعداد كلمة المرور الخاصة بك وتفعيل الحساب:</strong></p>
+        <div style="text-align: center;">
+          <a href="${setupUrl}" class="btn">إعداد كلمة المرور والدخول للنظام</a>
+        </div>
+        <div class="info-box">
+          <p style="margin: 0;"><strong>البريد الإلكتروني:</strong> ${email.toLowerCase()}</p>
+        </div>
+        <p style="color: #ef4444; font-size: 14px; margin-bottom: 0;">ملاحظة: هذا الرابط صالح لمدة 7 أيام فقط.</p>
+      </div>
+      
+      <hr class="divider" />
+      
+      <!-- English Section -->
+      <div class="en-section">
+        <h2 style="color: #2563eb; margin-top: 0;">Hello ${name},</h2>
+        <p>An account has been created for you in the <strong>Safana Najd</strong> system.</p>
+        <p><strong>Please click the link below to set up your password and activate your account:</strong></p>
+        <div style="text-align: center;">
+          <a href="${setupUrl}" class="btn">Set Password & Login</a>
+        </div>
+        <div class="info-box">
+          <p style="margin: 0;"><strong>Email:</strong> ${email.toLowerCase()}</p>
+        </div>
+        <p style="color: #ef4444; font-size: 14px; margin-bottom: 0;">Note: This link is valid for 7 days only.</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
         `;
 
       await resend.emails.send({

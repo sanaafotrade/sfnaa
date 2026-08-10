@@ -26,6 +26,8 @@ export default function UsersPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [userToDelete, setUserToDelete] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Form State
   const [name, setName] = useState('');
@@ -110,17 +112,25 @@ export default function UsersPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('هل أنت متأكد من حذف هذا المستخدم؟')) return;
+  const confirmDelete = (id: string) => {
+    setUserToDelete(id);
+  };
+
+  const handleDelete = async () => {
+    if (!userToDelete) return;
+    setIsDeleting(true);
     
     try {
-      const res = await fetch(`/api/users/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/users/${userToDelete}`, { method: 'DELETE' });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       toast.success('تم الحذف بنجاح');
+      setUserToDelete(null);
       fetchUsers();
     } catch (err: any) {
       toast.error(err.message || 'حدث خطأ أثناء الحذف');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -215,7 +225,7 @@ export default function UsersPage() {
                         </button>
                         {u.role !== 'OWNER' && (
                           <button 
-                            onClick={() => handleDelete(u.id)}
+                            onClick={() => confirmDelete(u.id)}
                             className="p-2 text-neutral-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
                             title="حذف"
                           >
@@ -352,6 +362,42 @@ export default function UsersPage() {
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      {userToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm font-sans" dir="rtl">
+          <div className="bg-white dark:bg-neutral-900 rounded-2xl shadow-xl w-full max-w-sm border border-neutral-200 dark:border-neutral-800 overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="p-6 text-center">
+              <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mb-4 mx-auto">
+                <Trash2 className="w-8 h-8 text-red-600 dark:text-red-500" />
+              </div>
+              <h3 className="text-xl font-bold text-neutral-900 dark:text-white mb-2">حذف الموظف</h3>
+              <p className="text-neutral-500 dark:text-neutral-400 text-sm mb-6">
+                هل أنت متأكد من رغبتك في حذف هذا الموظف؟ لا يمكن التراجع عن هذا الإجراء.
+              </p>
+              
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setUserToDelete(null)}
+                  disabled={isDeleting}
+                  className="flex-1 px-4 py-2.5 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 rounded-xl font-medium transition-colors disabled:opacity-50"
+                >
+                  إلغاء
+                </button>
+                <button
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium transition-colors disabled:opacity-70"
+                >
+                  {isDeleting ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
+                  نعم، حذف
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

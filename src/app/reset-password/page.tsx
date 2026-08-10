@@ -2,9 +2,11 @@
 
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ShieldCheck, Loader2, Eye, EyeOff, Lock } from 'lucide-react';
+import { ShieldCheck, Loader2, Eye, EyeOff, Lock, Globe } from 'lucide-react';
+import { useLanguage } from '@/lib/i18n';
 
 function ResetPasswordForm() {
+  const { lang, t, setLanguage } = useLanguage();
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -19,15 +21,15 @@ function ResetPasswordForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!token) {
-      setError('الرابط غير صالح أو مفقود.');
+      setError(t({ ar: 'الرابط غير صالح أو مفقود.', en: 'Invalid or missing link.' }));
       return;
     }
     if (newPassword !== confirmPassword) {
-      setError('كلمة المرور الجديدة غير متطابقة.');
+      setError(t({ ar: 'كلمة المرور الجديدة غير متطابقة.', en: 'New passwords do not match.' }));
       return;
     }
     if (newPassword.length < 6) {
-      setError('كلمة المرور يجب أن تكون 6 أحرف على الأقل.');
+      setError(t({ ar: 'كلمة المرور يجب أن تكون 6 أحرف على الأقل.', en: 'Password must be at least 6 characters.' }));
       return;
     }
 
@@ -45,29 +47,42 @@ function ResetPasswordForm() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || 'حدث خطأ غير متوقع');
+        throw new Error(data.error || t({ ar: 'حدث خطأ غير متوقع', en: 'An unexpected error occurred' }));
       }
 
-      setSuccess('تم تغيير كلمة المرور بنجاح. جاري تحويلك لصفحة الدخول...');
+      setSuccess(t({ ar: 'تم تغيير كلمة المرور بنجاح. جاري تحويلك لصفحة الدخول...', en: 'Password changed successfully. Redirecting to login...' }));
       setTimeout(() => {
         router.push('/login');
       }, 2000);
     } catch (err: any) {
-      setError(err.message || 'حدث خطأ أثناء تغيير كلمة المرور');
+      setError(err.message || t({ ar: 'حدث خطأ أثناء تغيير كلمة المرور', en: 'An error occurred while changing password' }));
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="w-full max-w-md bg-white dark:bg-neutral-950 rounded-2xl shadow-xl border border-neutral-200 dark:border-neutral-800 p-8">
-      <div className="flex flex-col items-center mb-8">
+    <div className="w-full max-w-md bg-white dark:bg-neutral-950 rounded-2xl shadow-xl border border-neutral-200 dark:border-neutral-800 p-8 relative" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+      {/* Language Switcher */}
+      <div className="absolute top-4 left-4 md:top-6 md:left-6">
+        <button
+          onClick={() => setLanguage(lang === 'ar' ? 'en' : 'ar')}
+          className="flex items-center gap-2 px-3 py-1.5 bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-full text-xs font-bold text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors shadow-sm"
+        >
+          <Globe className="w-3.5 h-3.5" />
+          {lang === 'ar' ? 'English' : 'العربية'}
+        </button>
+      </div>
+
+      <div className="flex flex-col items-center mb-8 mt-4">
         <div className="w-16 h-16 bg-blue-50 dark:bg-blue-900/30 rounded-full flex items-center justify-center mb-4">
           <Lock className="w-8 h-8 text-blue-600 dark:text-blue-500" />
         </div>
-        <h1 className="text-2xl font-bold text-neutral-900 dark:text-white mb-2 text-center">تعيين كلمة مرور جديدة</h1>
+        <h1 className="text-2xl font-bold text-neutral-900 dark:text-white mb-2 text-center">
+          {t({ ar: 'تعيين كلمة مرور جديدة', en: 'Set New Password' })}
+        </h1>
         <p className="text-neutral-500 dark:text-neutral-400 text-center text-sm leading-relaxed">
-          يرجى إدخال كلمة المرور الجديدة وتأكيدها بالأسفل.
+          {t({ ar: 'يرجى إدخال كلمة المرور الجديدة وتأكيدها بالأسفل.', en: 'Please enter your new password and confirm it below.' })}
         </p>
       </div>
 
@@ -79,7 +94,7 @@ function ResetPasswordForm() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              كلمة المرور الجديدة
+              {t({ ar: 'كلمة المرور الجديدة', en: 'New Password' })}
             </label>
             <div className="relative">
               <input
@@ -102,7 +117,7 @@ function ResetPasswordForm() {
 
           <div>
             <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-              تأكيد كلمة المرور
+              {t({ ar: 'تأكيد كلمة المرور', en: 'Confirm Password' })}
             </label>
             <input
               type={showPassword ? 'text' : 'password'}
@@ -123,9 +138,9 @@ function ResetPasswordForm() {
           <button
             type="submit"
             disabled={isLoading || !token}
-            className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors focus:ring-4 focus:ring-blue-600/20 disabled:opacity-70 flex items-center justify-center mt-6"
+            className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition-all shadow-md hover:shadow-lg disabled:opacity-70 flex items-center justify-center mt-6"
           >
-            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'حفظ كلمة المرور'}
+            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : t({ ar: 'حفظ كلمة المرور', en: 'Save Password' })}
           </button>
         </form>
       )}
