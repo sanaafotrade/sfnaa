@@ -90,6 +90,7 @@ model User {
   id          String   @id @default(cuid())
   name        String
   email       String   @unique
+  phone       String?  @unique
   password    String   // Hashed password
   role        String   @default("EMPLOYEE") // "OWNER", "MANAGER", "EMPLOYEE"
   permissions String[] @default([]) // e.g. ["email", "settings", "services", "partners", "users"]

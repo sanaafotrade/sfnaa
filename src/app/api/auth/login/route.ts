@@ -19,10 +19,10 @@ const verifyPassword = (password: string, hash: string) => {
 
 export async function POST(request: Request) {
   try {
-    const { email, password } = await request.json();
+    const { loginId, password } = await request.json();
     
-    if (!email || !password) {
-      return NextResponse.json({ error: 'الرجاء إدخال البريد الإلكتروني وكلمة المرور' }, { status: 400 });
+    if (!loginId || !password) {
+      return NextResponse.json({ error: 'الرجاء إدخال البريد الإلكتروني (أو رقم الجوال) وكلمة المرور' }, { status: 400 });
     }
 
     // Default admin creation if no users exist
@@ -40,8 +40,13 @@ export async function POST(request: Request) {
       });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: email.toLowerCase() }
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: loginId.toLowerCase() },
+          { phone: loginId }
+        ]
+      }
     });
 
     if (!user || !user.isActive) {
