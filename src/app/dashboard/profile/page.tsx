@@ -1,13 +1,18 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ShieldCheck, User, Mail, Lock, Loader2, Save } from 'lucide-react';
+import { ShieldCheck, User, Mail, Lock, Loader2, Save, Phone } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function ProfilePage() {
   const [user, setUser] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   
+  const [editName, setEditName] = useState('');
+  const [editEmail, setEditEmail] = useState('');
+  const [editPhone, setEditPhone] = useState('');
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -17,11 +22,38 @@ export default function ProfilePage() {
     fetch('/api/profile')
       .then(res => res.json())
       .then(data => {
-        if (!data.error) setUser(data);
+        if (!data.error) {
+          setUser(data);
+          setEditName(data.name || '');
+          setEditEmail(data.email || '');
+          setEditPhone(data.phone || '');
+        }
         setIsLoading(false);
       })
       .catch(() => setIsLoading(false));
   }, []);
+
+  const handleSaveProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSavingProfile(true);
+    try {
+      const res = await fetch('/api/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: editName, email: editEmail, phone: editPhone })
+      });
+      const data = await res.json();
+      
+      if (!res.ok) throw new Error(data.error || 'حدث خطأ أثناء حفظ البيانات');
+      
+      setUser(data.user);
+      toast.success('تم حفظ البيانات الشخصية بنجاح');
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setIsSavingProfile(false);
+    }
+  };
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,35 +116,70 @@ export default function ProfilePage() {
           <h2 className="text-lg font-semibold text-neutral-900 dark:text-white mb-6 border-b border-neutral-100 dark:border-neutral-800 pb-4">
             البيانات الأساسية
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="flex items-center gap-2 text-sm font-medium text-neutral-500 dark:text-neutral-400 mb-2">
-                <User className="w-4 h-4" />
-                الاسم
-              </label>
-              <div className="px-4 py-3 bg-neutral-50 dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-white">
-                {user?.name}
+          <form onSubmit={handleSaveProfile} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="flex items-center gap-2 text-sm font-medium text-neutral-500 dark:text-neutral-400 mb-2">
+                  <User className="w-4 h-4" />
+                  الاسم
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="w-full px-4 py-3 bg-neutral-50 dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-white focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none"
+                />
+              </div>
+              <div>
+                <label className="flex items-center gap-2 text-sm font-medium text-neutral-500 dark:text-neutral-400 mb-2">
+                  <Mail className="w-4 h-4" />
+                  البريد الإلكتروني
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={editEmail}
+                  onChange={(e) => setEditEmail(e.target.value)}
+                  className="w-full px-4 py-3 bg-neutral-50 dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-white focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none"
+                  dir="ltr"
+                />
+              </div>
+              <div>
+                <label className="flex items-center gap-2 text-sm font-medium text-neutral-500 dark:text-neutral-400 mb-2">
+                  <Phone className="w-4 h-4" />
+                  رقم الجوال
+                </label>
+                <input
+                  type="text"
+                  value={editPhone}
+                  onChange={(e) => setEditPhone(e.target.value)}
+                  className="w-full px-4 py-3 bg-neutral-50 dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-white focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none"
+                  dir="ltr"
+                  placeholder="+966 5..."
+                />
+              </div>
+              <div>
+                <label className="flex items-center gap-2 text-sm font-medium text-neutral-500 dark:text-neutral-400 mb-2">
+                  <ShieldCheck className="w-4 h-4" />
+                  الصلاحية
+                </label>
+                <div className="px-4 py-3 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 rounded-xl border border-blue-200 dark:border-blue-800 inline-block font-medium">
+                  {user?.role === 'OWNER' ? 'المدير العام' : user?.role === 'MANAGER' ? 'مدير' : 'موظف'}
+                </div>
               </div>
             </div>
-            <div>
-              <label className="flex items-center gap-2 text-sm font-medium text-neutral-500 dark:text-neutral-400 mb-2">
-                <Mail className="w-4 h-4" />
-                البريد الإلكتروني
-              </label>
-              <div className="px-4 py-3 bg-neutral-50 dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-white">
-                {user?.email}
-              </div>
+            <div className="flex justify-end pt-4">
+              <button
+                type="submit"
+                disabled={isSavingProfile}
+                className="py-3 px-6 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors focus:ring-4 focus:ring-blue-600/20 disabled:opacity-70 flex items-center justify-center gap-2"
+              >
+                {isSavingProfile ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
+                حفظ التعديلات
+              </button>
             </div>
-            <div>
-              <label className="flex items-center gap-2 text-sm font-medium text-neutral-500 dark:text-neutral-400 mb-2">
-                <ShieldCheck className="w-4 h-4" />
-                الصلاحية
-              </label>
-              <div className="px-4 py-3 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 rounded-xl border border-blue-200 dark:border-blue-800 inline-block font-medium">
-                {user?.role === 'OWNER' ? 'المدير العام' : user?.role === 'MANAGER' ? 'مدير' : 'موظف'}
-              </div>
-            </div>
-          </div>
+          </form>
         </div>
 
         {/* Change Password Card */}
