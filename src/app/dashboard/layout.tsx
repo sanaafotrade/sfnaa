@@ -103,10 +103,16 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             {t({ ar: "الموقع الإلكتروني", en: "Website" })}
           </div>
           {(user?.role === 'OWNER' || user?.role === 'MANAGER' || user?.permissions.includes('settings')) && (
-            <Link href="/dashboard/site-settings" className={navLinkClass("/dashboard/site-settings")}>
-              <Globe className="w-5 h-5" />
-              {t({ ar: "إعدادات الموقع", en: "Site Settings" })}
-            </Link>
+            <>
+              <Link href="/dashboard/settings" className={navLinkClass("/dashboard/settings")}>
+                <Globe className="w-5 h-5" />
+                {t({ ar: "إعدادات الموقع", en: "Site Settings" })}
+              </Link>
+              <Link href="/dashboard/landing-settings" className={navLinkClass("/dashboard/landing-settings")}>
+                <Layout className="w-5 h-5" />
+                {t({ ar: "محتوى الواجهة", en: "Landing Content" })}
+              </Link>
+            </>
           )}
           {(user?.role === 'OWNER' || user?.role === 'MANAGER' || user?.permissions.includes('letters')) && (
             <Link href="/dashboard/hr-letters" className={navLinkClass("/dashboard/hr-letters")}>
