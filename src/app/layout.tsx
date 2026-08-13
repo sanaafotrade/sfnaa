@@ -8,10 +8,21 @@ const cairo = Cairo({
   subsets: ["arabic", "latin"],
 });
 
-export const metadata: Metadata = {
-  title: "سفانة نجد للتجارة | Safana Najd Trading",
-  description: "شركة محلية ودولية متخصصة في استيراد وتصدير المواد الخام وتوريد البلاستيك للمصانع. | Local and international trade company specializing in importing and exporting raw materials.",
-};
+import prisma from '@/lib/prisma';
+
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await prisma.letterTemplateSettings.findUnique({
+    where: { id: 'default' }
+  }).catch(() => null);
+
+  return {
+    title: "سفانة نجد للتجارة | Safana Najd Trading",
+    description: "شركة محلية ودولية متخصصة في استيراد وتصدير المواد الخام وتوريد البلاستيك للمصانع. | Local and international trade company specializing in importing and exporting raw materials.",
+    icons: {
+      icon: settings?.companyLogoUrl || '/favicon.ico',
+    }
+  };
+}
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

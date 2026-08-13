@@ -521,7 +521,7 @@ function ComposeLetterContent() {
 
                   {/* ═══ WATERMARK ═════════════════════════════════════ */}
                   {settings.companyLogoUrl && (
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0" style={{ opacity: 0.03 }}>
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0" style={{ opacity: 0.05 }}>
                       <img src={settings.companyLogoUrl} alt="" style={{ width: '50%', objectFit: 'contain' }} />
                     </div>
                   )}

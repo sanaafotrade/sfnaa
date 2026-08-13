@@ -43,7 +43,7 @@ export default function LandingPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const { services, partners, settings } = data;
+  const { services, partners, settings, generalSettings } = data;
 
   const toggleLang = () => {
     setLang(lang === 'ar' ? 'en' : 'ar');
@@ -58,7 +58,11 @@ export default function LandingPage() {
       <header className="sticky top-0 z-50 glass w-full transition-colors duration-300">
         <div className="container mx-auto px-6 h-24 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Globe className="w-12 h-12 text-gold" />
+            {generalSettings?.companyLogoUrl ? (
+              <img src={generalSettings.companyLogoUrl} alt="Logo" className="w-12 h-12 object-contain" />
+            ) : (
+              <Globe className="w-12 h-12 text-gold" />
+            )}
             <span className="font-extrabold text-3xl md:text-4xl">
               {lang === 'ar' ? 'سفانة نجد' : 'Safana Najd'}
             </span>
@@ -292,7 +296,11 @@ export default function LandingPage() {
       <footer className="bg-primary text-white py-12 border-t border-white/10">
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center gap-2 mb-6">
-            <Globe className="w-6 h-6 text-gold" />
+            {generalSettings?.companyLogoUrl ? (
+              <img src={generalSettings.companyLogoUrl} alt="Logo" className="w-6 h-6 object-contain" />
+            ) : (
+              <Globe className="w-6 h-6 text-gold" />
+            )}
             <span className="font-bold text-xl">
               {lang === 'ar' ? 'سفانة نجد' : 'Safana Najd'}
             </span>

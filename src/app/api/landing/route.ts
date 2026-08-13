@@ -5,10 +5,11 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const [services, partners, settingsResult] = await Promise.all([
+    const [services, partners, settingsResult, generalSettingsResult] = await Promise.all([
       prisma.service.findMany({ where: { isActive: true }, orderBy: { order: 'asc' } }),
       prisma.partner.findMany({ where: { isActive: true }, orderBy: { order: 'asc' } }),
       prisma.siteSettings.findUnique({ where: { id: 'default' } }),
+      prisma.letterTemplateSettings.findUnique({ where: { id: 'default' } }),
     ]);
 
     let settings = settingsResult;
@@ -22,6 +23,7 @@ export async function GET() {
       services,
       partners,
       settings,
+      generalSettings: generalSettingsResult,
     });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch landing data' }, { status: 500 });
