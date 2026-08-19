@@ -4,13 +4,18 @@ import { useState } from "react";
 import { UserPlus, Loader2 } from "lucide-react";
 
 export default function AddContactButton({ email, defaultName = "" }: { email: string, defaultName?: string }) {
+  const rawEmailMatch = email.match(/<([^>]+)>/);
+  const rawEmail = rawEmailMatch ? rawEmailMatch[1] : email;
+  const rawName = email.split("<")[0].trim().replace(/^"|"$/g, '');
+
   const [isOpen, setIsOpen] = useState(false);
-  const [name, setName] = useState(defaultName || email.split("@")[0]);
+  const [name, setName] = useState(defaultName || rawName || rawEmail.split("@")[0]);
   const [phone, setPhone] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
 
-  if (isSaved) return null; // Hide after saving
+  // Hide the button if the email belongs to our domain or if it's already saved
+  if (isSaved || rawEmail.includes("@sfnaa.com")) return null;
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,7 +24,7 @@ export default function AddContactButton({ email, defaultName = "" }: { email: s
       const res = await fetch("/api/contacts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, name, phone })
+        body: JSON.stringify({ email: rawEmail, name, phone })
       });
       if (res.ok) {
         setIsSaved(true);
@@ -57,7 +62,7 @@ export default function AddContactButton({ email, defaultName = "" }: { email: s
                   <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">البريد الإلكتروني</label>
                   <input 
                     type="email" 
-                    value={email} 
+                    value={rawEmail} 
                     disabled
                     className="w-full bg-neutral-100 dark:bg-neutral-800 text-neutral-500 border border-neutral-200 dark:border-neutral-700 rounded-lg p-2.5 text-left dir-ltr" 
                   />

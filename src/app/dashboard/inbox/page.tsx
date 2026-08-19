@@ -836,9 +836,10 @@ export default function EmailPage() {
                       </p>
                       <AddContactButton email={selectedEmail.from} />
                     </div>
-                    <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
-                      {t({ ar: "إلى", en: "To" })} : {selectedEmail.to}
-                    </p>
+                    <div className="flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+                      <span>{t({ ar: "إلى", en: "To" })} : {selectedEmail.to}</span>
+                      <AddContactButton email={selectedEmail.to} />
+                    </div>
                   </div>
                 </div>
                 <div className="text-sm text-neutral-500 dark:text-neutral-400 flex items-center gap-2 bg-neutral-50 dark:bg-neutral-900 px-3 py-1.5 rounded-lg border border-neutral-100 dark:border-neutral-800">
