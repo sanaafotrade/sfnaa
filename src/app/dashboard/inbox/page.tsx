@@ -14,6 +14,7 @@ import {
   Heading1, Heading2, Wand2
 } from "lucide-react";
 import ContactSelector from "@/components/ContactSelector";
+import AddContactButton from "@/components/AddContactButton";
 
 // ============ Types ============
 interface EmailRecord {
@@ -383,13 +384,13 @@ export default function EmailPage() {
 
               <div className="pt-4 border-t border-neutral-100 dark:border-neutral-800">
                 <label className="flex items-center gap-3 cursor-pointer group">
-                  <div className={`w-10 h-6 flex items-center bg-neutral-300 dark:bg-neutral-700 rounded-full p-1 transition-colors duration-300 ${settings.signatureEnabled ? 'bg-blue-600 dark:bg-blue-500' : ''}`}>
-                    <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300 ${settings.signatureEnabled ? 'translate-x-[-16px]' : ''}`}></div>
+                  <div className={`relative w-11 h-6 rounded-full transition-colors duration-300 ${settings.signatureEnabled ? 'bg-blue-600' : 'bg-neutral-300 dark:bg-neutral-700'}`}>
+                    <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow-md transition-all duration-300 ${settings.signatureEnabled ? 'left-1' : 'right-1'}`}></div>
                   </div>
                   <input 
                     type="checkbox"
                     className="hidden"
-                    checked={settings.signatureEnabled}
+                    checked={settings.signatureEnabled || false}
                     onChange={(e) => setSettings({ ...settings, signatureEnabled: e.target.checked })}
                   />
                   <div>
@@ -406,13 +407,13 @@ export default function EmailPage() {
               {/* Forwarding Settings */}
               <div className="pt-4 border-t border-neutral-100 dark:border-neutral-800">
                 <label className="flex items-center gap-3 cursor-pointer group mb-4">
-                  <div className={`w-10 h-6 flex items-center bg-neutral-300 dark:bg-neutral-700 rounded-full p-1 transition-colors duration-300 ${settings.forwardingEnabled ? 'bg-blue-600 dark:bg-blue-500' : ''}`}>
-                    <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300 ${settings.forwardingEnabled ? 'translate-x-[-16px]' : ''}`}></div>
+                  <div className={`relative w-11 h-6 rounded-full transition-colors duration-300 ${settings.forwardingEnabled ? 'bg-blue-600' : 'bg-neutral-300 dark:bg-neutral-700'}`}>
+                    <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow-md transition-all duration-300 ${settings.forwardingEnabled ? 'left-1' : 'right-1'}`}></div>
                   </div>
                   <input 
                     type="checkbox"
                     className="hidden"
-                    checked={settings.forwardingEnabled}
+                    checked={settings.forwardingEnabled || false}
                     onChange={(e) => setSettings({ ...settings, forwardingEnabled: e.target.checked })}
                   />
                   <div>
@@ -829,9 +830,12 @@ export default function EmailPage() {
                     {getInitials(selectedEmail.from)}
                   </div>
                   <div>
-                    <p className="font-bold text-neutral-900 dark:text-white text-base">
-                      {selectedEmail.from}
-                    </p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-bold text-neutral-900 dark:text-white text-base">
+                        {selectedEmail.from}
+                      </p>
+                      <AddContactButton email={selectedEmail.from} />
+                    </div>
                     <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
                       {t({ ar: "إلى", en: "To" })} : {selectedEmail.to}
                     </p>
