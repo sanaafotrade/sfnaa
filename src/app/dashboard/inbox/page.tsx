@@ -13,6 +13,7 @@ import {
   Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight,
   Heading1, Heading2, Wand2
 } from "lucide-react";
+import ContactSelector from "@/components/ContactSelector";
 
 // ============ Types ============
 interface EmailRecord {
@@ -402,6 +403,45 @@ export default function EmailPage() {
                 </label>
               </div>
 
+              {/* Forwarding Settings */}
+              <div className="pt-4 border-t border-neutral-100 dark:border-neutral-800">
+                <label className="flex items-center gap-3 cursor-pointer group mb-4">
+                  <div className={`w-10 h-6 flex items-center bg-neutral-300 dark:bg-neutral-700 rounded-full p-1 transition-colors duration-300 ${settings.forwardingEnabled ? 'bg-blue-600 dark:bg-blue-500' : ''}`}>
+                    <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300 ${settings.forwardingEnabled ? 'translate-x-[-16px]' : ''}`}></div>
+                  </div>
+                  <input 
+                    type="checkbox"
+                    className="hidden"
+                    checked={settings.forwardingEnabled}
+                    onChange={(e) => setSettings({ ...settings, forwardingEnabled: e.target.checked })}
+                  />
+                  <div>
+                    <span className="block text-sm font-bold text-neutral-900 dark:text-white group-hover:text-blue-600 transition-colors">
+                      إعادة توجيه الرسائل المستلمة
+                    </span>
+                    <span className="text-xs text-neutral-500 dark:text-neutral-400">
+                      يتم إرسال نسخة من كل رسالة واردة لبريدك الشخصي.
+                    </span>
+                  </div>
+                </label>
+
+                {settings.forwardingEnabled && (
+                  <div className="animate-in fade-in slide-in-from-top-2 duration-300 pl-4 border-r-2 border-blue-500 mr-2">
+                    <label className="block text-sm font-bold text-neutral-700 dark:text-neutral-300 mb-2">
+                      بريد إعادة التوجيه (البريد الشخصي)
+                    </label>
+                    <input
+                      type="email"
+                      value={settings.forwardToEmail || ''}
+                      onChange={(e) => setSettings({ ...settings, forwardToEmail: e.target.value })}
+                      placeholder="example@gmail.com"
+                      dir="ltr"
+                      className="w-full border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none transition-colors"
+                    />
+                  </div>
+                )}
+              </div>
+
               {settings.signatureEnabled && (
                 <div className="animate-in fade-in slide-in-from-top-2 duration-300">
                   <label className="block text-sm font-bold text-neutral-700 dark:text-neutral-300 mb-2">
@@ -654,7 +694,10 @@ export default function EmailPage() {
             <form onSubmit={handleSendEmail} className="p-6 md:p-10 space-y-6 flex-1 max-w-4xl mx-auto w-full">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-bold text-neutral-700 dark:text-neutral-300 mb-2">{t({ ar: "إلى", en: "To" })}</label>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-sm font-bold text-neutral-700 dark:text-neutral-300">{t({ ar: "إلى", en: "To" })}</label>
+                    <ContactSelector onSelect={email => setComposeTo(email)} />
+                  </div>
                   <input
                     type="email"
                     value={composeTo}
@@ -822,11 +865,18 @@ export default function EmailPage() {
               )}
 
               {/* Original Content */}
-              <div className="prose dark:prose-invert max-w-none text-neutral-800 dark:text-neutral-200 leading-loose whitespace-pre-wrap text-[15px]">
+              <div className="text-neutral-800 dark:text-neutral-200">
                 {selectedEmail.html ? (
-                  <div dangerouslySetInnerHTML={{ __html: selectedEmail.html }} />
+                  <iframe 
+                    srcDoc={selectedEmail.html} 
+                    className="w-full min-h-[600px] border-0 rounded-xl bg-white"
+                    title="Email Content"
+                    sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin"
+                  />
                 ) : (
-                  <p>{selectedEmail.text}</p>
+                  <div className="prose dark:prose-invert max-w-none leading-loose whitespace-pre-wrap text-[15px]">
+                    <p>{selectedEmail.text}</p>
+                  </div>
                 )}
               </div>
 

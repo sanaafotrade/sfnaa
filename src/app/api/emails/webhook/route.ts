@@ -41,7 +41,7 @@ export async function POST(req: Request) {
       }
       
       // Save incoming email to Inbox
-      await prisma.emailRecord.create({
+      const newEmail = await prisma.emailRecord.create({
         data: {
           from: emailData.from || "unknown@sender.com",
           to: toField,
@@ -56,6 +56,27 @@ export async function POST(req: Request) {
           })),
         }
       });
+
+      // Forwarding Logic
+      const settings = await prisma.emailSettings.findUnique({ where: { id: "default" } });
+      if (settings?.forwardingEnabled && settings.forwardToEmail) {
+        try {
+          await resend.emails.send({
+            from: "info@sfnaa.com", 
+            to: settings.forwardToEmail,
+            subject: `[FWD] ${emailData.subject || "No Subject"}`,
+            text: `تم إعادة توجيه هذه الرسالة من صندوق وارد: ${toField}\nالمرسل الأصلي: ${emailData.from}\n\n${textContent}`,
+            html: `<div dir="rtl">
+              <p><strong>تم إعادة توجيه هذه الرسالة لك من صندوق الوارد:</strong> ${toField}</p>
+              <p><strong>المرسل الأصلي:</strong> ${emailData.from}</p>
+              <hr/>
+              ${htmlContent || textContent}
+            </div>`
+          });
+        } catch (fwdError) {
+          console.error("Failed to forward email:", fwdError);
+        }
+      }
 
       return NextResponse.json({ success: true, message: "Email received and saved." }, { status: 200 });
     }

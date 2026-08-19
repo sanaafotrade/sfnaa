@@ -5,6 +5,7 @@ import { notFound, redirect } from "next/navigation";
 import { format } from "date-fns";
 import { arSA } from "date-fns/locale";
 import { revalidatePath } from "next/cache";
+import AddContactButton from "@/components/AddContactButton";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +26,12 @@ export default async function EmailViewPage({ params }: { params: { id: string }
   if (!email) {
     notFound();
   }
+
+  // Check if sender/receiver is in contacts
+  const targetEmail = email.status === "sent" ? email.to : email.from;
+  const existingContact = await prisma.contact.findUnique({
+    where: { email: targetEmail }
+  });
 
   // Mark as read if it's unread
   if (!email.isRead) {
@@ -78,6 +85,12 @@ export default async function EmailViewPage({ params }: { params: { id: string }
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-neutral-900 dark:text-white">{email.from}</span>
+                    {!existingContact && !isIncoming && (
+                      <AddContactButton email={email.to} defaultName={email.to.split('@')[0]} />
+                    )}
+                    {!existingContact && isIncoming && (
+                      <AddContactButton email={email.from} defaultName={email.from.split('@')[0]} />
+                    )}
                   </div>
                   <div className="text-sm text-neutral-500 flex items-center gap-1 mt-0.5">
                     إلى: <span className="text-neutral-700 dark:text-neutral-300">{email.to}</span>
@@ -101,12 +114,19 @@ export default async function EmailViewPage({ params }: { params: { id: string }
             </div>
           )}
 
-          {/* Email Body */}
-          <div className="prose dark:prose-invert max-w-none">
+          {/* Original Content */}
+          <div className="text-neutral-800 dark:text-neutral-200">
             {email.html ? (
-              <div dangerouslySetInnerHTML={{ __html: email.html }} />
+              <iframe 
+                srcDoc={email.html} 
+                className="w-full min-h-[600px] border-0 rounded-xl bg-white"
+                title="Email Content"
+                sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin"
+              />
             ) : (
-              <div className="whitespace-pre-wrap">{email.text}</div>
+              <div className="prose dark:prose-invert max-w-none leading-loose whitespace-pre-wrap text-[15px]">
+                <p>{email.text}</p>
+              </div>
             )}
           </div>
 

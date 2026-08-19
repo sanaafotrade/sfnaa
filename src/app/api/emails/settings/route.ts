@@ -39,6 +39,8 @@ export async function POST(req: Request) {
         autoReplySubject: data.autoReplySubject,
         autoReplyBody: data.autoReplyBody,
         autoReplyTeamName: data.autoReplyTeamName,
+        forwardingEnabled: data.forwardingEnabled,
+        forwardToEmail: data.forwardToEmail,
       },
       create: {
         id: "default",
@@ -49,6 +51,8 @@ export async function POST(req: Request) {
         autoReplySubject: data.autoReplySubject || "",
         autoReplyBody: data.autoReplyBody || "",
         autoReplyTeamName: data.autoReplyTeamName || "",
+        forwardingEnabled: data.forwardingEnabled ?? false,
+        forwardToEmail: data.forwardToEmail || "",
       }
     });
 
