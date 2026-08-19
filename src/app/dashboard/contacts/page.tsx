@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { Users, Trash2, Plus, Loader2 } from "lucide-react";
+import { Users, Trash2, Plus, Loader2, Edit2, AlertCircle } from "lucide-react";
 
 interface Contact {
   id: string;
@@ -16,9 +16,11 @@ export default function ContactsPage() {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  const [contactToDelete, setContactToDelete] = useState<Contact | null>(null);
 
-  // New Contact State
+  // New/Edit Contact State
   const [isAdding, setIsAdding] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -41,8 +43,9 @@ export default function ContactsPage() {
     loadContacts();
   }, []);
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("هل أنت متأكد من الحذف؟")) return;
+  const handleDelete = async () => {
+    if (!contactToDelete) return;
+    const id = contactToDelete.id;
     setIsDeleting(id);
     try {
       const res = await fetch(`/api/contacts?id=${id}`, { method: "DELETE" });
@@ -56,28 +59,44 @@ export default function ContactsPage() {
       toast.error("خطأ بالاتصال");
     } finally {
       setIsDeleting(null);
+      setContactToDelete(null);
     }
   };
 
-  const handleAdd = async (e: React.FormEvent) => {
+  const handleEdit = (c: Contact) => {
+    setEditId(c.id);
+    setName(c.name);
+    setEmail(c.email);
+    setPhone(c.phone || "");
+    setIsAdding(true);
+  };
+
+  const handleAddOrEdit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
     try {
+      const method = editId ? "PUT" : "POST";
+      const payload = editId 
+        ? { id: editId, name, email, phone }
+        : { name, email, phone };
+        
       const res = await fetch("/api/contacts", {
-        method: "POST",
+        method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, phone })
+        body: JSON.stringify(payload)
       });
+      
       if (res.ok) {
-        toast.success("تمت الإضافة بنجاح");
+        toast.success(editId ? "تم التعديل بنجاح" : "تمت الإضافة بنجاح");
         setIsAdding(false);
+        setEditId(null);
         setName("");
         setEmail("");
         setPhone("");
         loadContacts();
       } else {
         const errorData = await res.json();
-        toast.error(errorData.error || "فشل الإضافة");
+        toast.error(errorData.error || "فشل الحفظ");
       }
     } catch {
       toast.error("خطأ بالاتصال");
@@ -88,6 +107,7 @@ export default function ContactsPage() {
 
   return (
     <div className="flex flex-col h-full bg-neutral-50 dark:bg-neutral-900" dir="rtl">
+      {/* Header */}
       <div className="px-8 py-6 bg-white dark:bg-neutral-950 border-b border-neutral-200 dark:border-neutral-800 flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-neutral-900 dark:text-white flex items-center gap-2">
@@ -97,7 +117,13 @@ export default function ContactsPage() {
           <p className="text-sm text-neutral-500 mt-1">إدارة الأسماء والبريد الإلكتروني الخاصة بعملائك وشركائك.</p>
         </div>
         <button 
-          onClick={() => setIsAdding(true)}
+          onClick={() => {
+            setEditId(null);
+            setName("");
+            setEmail("");
+            setPhone("");
+            setIsAdding(true);
+          }}
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 font-medium transition-colors"
         >
           <Plus className="w-5 h-5" />
@@ -106,10 +132,13 @@ export default function ContactsPage() {
       </div>
 
       <div className="flex-1 p-8 overflow-y-auto">
+        {/* Add/Edit Form */}
         {isAdding && (
           <div className="bg-white dark:bg-neutral-950 border border-blue-100 dark:border-blue-900/30 rounded-2xl p-6 mb-8 shadow-sm">
-            <h2 className="text-lg font-bold mb-4 dark:text-white">إضافة جديدة</h2>
-            <form onSubmit={handleAdd} className="flex flex-wrap gap-4 items-end">
+            <h2 className="text-lg font-bold mb-4 dark:text-white">
+              {editId ? "تعديل جهة اتصال" : "إضافة جديدة"}
+            </h2>
+            <form onSubmit={handleAddOrEdit} className="flex flex-wrap gap-4 items-end">
               <div className="flex-1 min-w-[200px]">
                 <label className="block text-sm mb-1 text-neutral-600 dark:text-neutral-400">الاسم <span className="text-red-500">*</span></label>
                 <input required value={name} onChange={e => setName(e.target.value)} type="text" className="w-full border dark:border-neutral-700 rounded-lg p-2 dark:bg-neutral-800 dark:text-white" />
@@ -126,7 +155,7 @@ export default function ContactsPage() {
                 <button type="submit" disabled={isSaving} className="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold w-24 flex justify-center">
                   {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : "حفظ"}
                 </button>
-                <button type="button" onClick={() => setIsAdding(false)} className="bg-neutral-200 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 px-4 py-2 rounded-lg font-bold">
+                <button type="button" onClick={() => { setIsAdding(false); setEditId(null); }} className="bg-neutral-200 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 px-4 py-2 rounded-lg font-bold">
                   إلغاء
                 </button>
               </div>
@@ -149,7 +178,7 @@ export default function ContactsPage() {
                   <th className="p-4 text-start font-bold">الاسم</th>
                   <th className="p-4 text-start font-bold">البريد الإلكتروني</th>
                   <th className="p-4 text-start font-bold">رقم التواصل</th>
-                  <th className="p-4 text-center font-bold w-20">إجراء</th>
+                  <th className="p-4 text-center font-bold w-32">إجراء</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-100 dark:divide-neutral-800">
@@ -159,13 +188,23 @@ export default function ContactsPage() {
                     <td className="p-4 text-neutral-600 dark:text-neutral-300" dir="ltr">{c.email}</td>
                     <td className="p-4 text-neutral-600 dark:text-neutral-300" dir="ltr">{c.phone || '-'}</td>
                     <td className="p-4 text-center">
-                      <button 
-                        onClick={() => handleDelete(c.id)}
-                        disabled={isDeleting === c.id}
-                        className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                      >
-                        {isDeleting === c.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-5 h-5" />}
-                      </button>
+                      <div className="flex items-center justify-center gap-2">
+                        <button 
+                          onClick={() => handleEdit(c)}
+                          className="p-2 text-neutral-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                          title="تعديل"
+                        >
+                          <Edit2 className="w-5 h-5" />
+                        </button>
+                        <button 
+                          onClick={() => setContactToDelete(c)}
+                          disabled={isDeleting === c.id}
+                          className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                          title="حذف"
+                        >
+                          {isDeleting === c.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-5 h-5" />}
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -174,6 +213,37 @@ export default function ContactsPage() {
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {contactToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-neutral-900 rounded-2xl w-full max-w-sm overflow-hidden shadow-xl border border-neutral-200 dark:border-neutral-800 p-6 text-center">
+            <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+              <AlertCircle className="w-8 h-8 text-red-600 dark:text-red-500" />
+            </div>
+            <h3 className="text-lg font-bold text-neutral-900 dark:text-white mb-2">
+              تأكيد الحذف
+            </h3>
+            <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-6">
+              هل أنت متأكد من حذف جهة الاتصال <span className="font-bold">"{contactToDelete.name}"</span>؟ لن يمكنك التراجع عن هذا الإجراء.
+            </p>
+            <div className="flex gap-3 justify-center">
+              <button 
+                onClick={() => setContactToDelete(null)}
+                className="px-6 py-2 rounded-xl text-neutral-600 dark:text-neutral-300 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 font-medium transition-colors"
+              >
+                إلغاء
+              </button>
+              <button 
+                onClick={handleDelete}
+                className="px-6 py-2 rounded-xl text-white bg-red-600 hover:bg-red-700 font-medium transition-colors flex items-center justify-center min-w-[100px]"
+              >
+                حذف
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

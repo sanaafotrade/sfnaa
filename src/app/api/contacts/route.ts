@@ -45,3 +45,21 @@ export async function DELETE(req: Request) {
     return NextResponse.json({ error: "Failed to delete" }, { status: 500 });
   }
 }
+
+export async function PUT(req: Request) {
+  try {
+    const { id, name, email, phone } = await req.json();
+    if (!id || !name || !email) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
+    const updated = await prisma.contact.update({
+      where: { id },
+      data: { name, email, phone: phone || null }
+    });
+    
+    return NextResponse.json(updated);
+  } catch (error) {
+    return NextResponse.json({ error: "Failed to update contact" }, { status: 500 });
+  }
+}
