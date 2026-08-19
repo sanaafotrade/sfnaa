@@ -576,13 +576,14 @@ export default function EmailPage() {
       )}
 
       {/* Main Container */}
-      <div className="flex-1 flex flex-col overflow-hidden bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-2xl shadow-sm">
-        {/* Folder Tabs + Toolbar */}
-        <div className="border-b border-neutral-100 dark:border-neutral-800 bg-neutral-50/80 dark:bg-neutral-900/50">
-          <div className="flex items-center justify-between px-4 py-2">
-            <div className="flex gap-1 overflow-x-auto">
-              {FOLDERS.map(f => (
-                <button
+      <div className="flex-1 p-4 md:p-6 lg:p-8 overflow-hidden flex flex-col bg-neutral-50 dark:bg-neutral-900">
+        <div className="flex-1 flex flex-col overflow-hidden bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-2xl shadow-sm">
+          {/* Folder Tabs + Toolbar */}
+          <div className="border-b border-neutral-100 dark:border-neutral-800 bg-neutral-50/80 dark:bg-neutral-900/50">
+            <div className="flex items-center justify-between px-4 py-2">
+              <div className="flex gap-1 overflow-x-auto">
+                {FOLDERS.map(f => (
+                  <button
                   key={f.key}
                   onClick={() => setActiveFolder(f.key)}
                   className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap ${
@@ -1036,5 +1037,6 @@ export default function EmailPage() {
         )}
       </div>
     </div>
-  );
+  </div>
+);
 }
