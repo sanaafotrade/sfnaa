@@ -967,7 +967,7 @@ export default function EmailPage() {
                     <div
                       key={email.id}
                       onClick={() => handleOpenEmail(email)}
-                      className={`relative flex items-center gap-4 px-4 py-3 cursor-pointer transition-all hover:bg-blue-50/50 dark:hover:bg-blue-900/10 border-r-4 ${
+                      className={`relative flex items-center gap-4 pl-8 pr-6 py-4 cursor-pointer transition-all hover:bg-blue-50/50 dark:hover:bg-blue-900/10 border-r-4 ${
                         !email.isRead && email.status === "inbox"
                           ? "bg-white dark:bg-neutral-900 font-bold border-blue-600 shadow-[0_1px_3px_rgba(0,0,0,0.05)] z-10"
                           : "bg-neutral-50/30 dark:bg-neutral-950/50 border-transparent"
